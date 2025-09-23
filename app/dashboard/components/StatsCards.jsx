@@ -1,0 +1,65 @@
+import { AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import { FileText, RefreshCw, Plus, PackageX, PackageMinus, PackageCheck } from "lucide-react"
+import AddProductDialog from "./AddProductDialog" // ✅ default export
+
+const StatsCards = () => {
+  return (
+    <div className="mb-10">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold text-gray-300">My Products</h2>
+        <div className="flex items-center gap-8">
+          {/* Refresh button */}
+          <button className="p-2 rounded-lg bg-[#2a2f45] hover:bg-[#353b52] border border-gray-700">
+            <RefreshCw className="h-5 w-5 text-gray-300" />
+          </button>
+
+          {/* Add Product Dialog with "Add New" button as trigger */}
+          <AddProductDialog>
+            <AlertDialogTrigger asChild>
+              <button className="flex items-center gap-5 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-medium shadow">
+                <Plus className="h-5 w-5" /> Add New
+              </button>
+            </AlertDialogTrigger>
+          </AddProductDialog>
+        </div>
+      </div>
+
+      {/* Stats cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-20">
+        <div className="bg-[#2a2f45] p-6 rounded-xl shadow border border-gray-700">
+          <div className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-blue-500" />
+            <h3 className="text-lg font-semibold text-gray-300">All Product</h3>
+          </div>
+          <p className="text-sm text-gray-400 mt-2">1 Product</p>
+        </div>
+
+        <div className="bg-[#2a2f45] p-6 rounded-xl shadow border border-gray-700">
+          <div className="flex items-center gap-2">
+            <PackageX className="h-5 w-5 text-red-500" />
+            <h3 className="text-lg font-semibold text-gray-300">Out of Stock</h3>
+          </div>
+          <p className="text-sm text-gray-400 mt-2">0 Product</p>
+        </div>
+
+        <div className="bg-[#2a2f45] p-6 rounded-xl shadow border border-gray-700">
+          <div className="flex items-center gap-2">
+            <PackageMinus className="h-5 w-5 text-yellow-500" />
+            <h3 className="text-lg font-semibold text-gray-300">Limited Stock</h3>
+          </div>
+          <p className="text-sm text-gray-400 mt-2">0 Product</p>
+        </div>
+
+        <div className="bg-[#2a2f45] p-6 rounded-xl shadow border border-gray-700">
+          <div className="flex items-center gap-2">
+            <PackageCheck className="h-5 w-5 text-green-500" />
+            <h3 className="text-lg font-semibold text-gray-300">Other Stock</h3>
+          </div>
+          <p className="text-sm text-gray-400 mt-2">1 Product</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default StatsCards

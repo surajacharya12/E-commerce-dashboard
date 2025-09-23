@@ -1,0 +1,19 @@
+import React from 'react';
+import { Image } from "lucide-react";
+
+// Top navigation bar component
+const TopBar = () => {
+  return (
+    <div className="flex justify-between items-center mb-8">
+      <h1 className="text-2xl font-semibold text-gray-300">Poster Management</h1>
+      <div className="flex items-center gap-4">
+        <p className="text-gray-400 text-sm">Total Poster: 0</p>
+        <button className="p-2 rounded-lg bg-[#2a2f45] hover:bg-[#353b52] border border-gray-700">
+          <Image className="h-5 w-5 text-gray-300" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default TopBar;
