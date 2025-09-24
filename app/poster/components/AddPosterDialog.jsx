@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,39 +13,77 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
-export default function AddPosterDialog({ children }) {
-  const [posterImage, setPosterImage] = useState(null)
-  const [posterName, setPosterName] = useState("")
+export default function AddPosterDialog({ children, onAddPoster, onEditPoster, initialData }) {
+  const [posterImage, setPosterImage] = useState(null);
+  const [posterName, setPosterName] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    if (initialData) {
+      setPosterName(initialData.posterName || "");
+      setPosterImage(initialData.posterImage || null);
+    } else {
+      setPosterName("");
+      setPosterImage(null);
+    }
+    setErrors({});
+  }, [initialData, isOpen]);
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
-      setPosterImage(URL.createObjectURL(e.target.files[0]))
+      setPosterImage(URL.createObjectURL(e.target.files[0]));
+      if (errors.posterImage) {
+        setErrors((prevErrors) => ({ ...prevErrors, posterImage: "" }));
+      }
     }
-  }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!posterName.trim()) {
+      newErrors.posterName = "Poster name is required.";
+    }
+    if (!posterImage && !initialData?.posterImage) {
+      newErrors.posterImage = "A poster image is required.";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    // Handle form submission logic here
-    console.log("Poster Name:", posterName)
-    console.log("Poster Image:", posterImage)
-    // You would typically reset the form after a successful submission
-    setPosterImage(null)
-    setPosterName("")
-  }
+    e.preventDefault();
+    if (!validateForm()) {
+      return;
+    }
+
+    const posterData = {
+      id: initialData?.id || Date.now(),
+      posterName,
+      posterImage,
+      date: new Date().toLocaleDateString(),
+    };
+    if (initialData) {
+      onEditPoster(posterData);
+    } else {
+      onAddPoster(posterData);
+    }
+    setIsOpen(false);
+  };
 
   return (
-    <AlertDialog>
+    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       {children}
       <AlertDialogContent className="max-w-xl">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-center text-xl font-semibold">
-            ADD POSTER
+            {initialData ? "EDIT POSTER" : "ADD POSTER"}
           </AlertDialogTitle>
         </AlertDialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           {/* Image Upload Area */}
-          <div className="flex flex-col items-center justify-center border rounded-lg p-12 bg-muted/20 cursor-pointer hover:bg-muted relative">
+          <div className={`flex flex-col items-center justify-center border rounded-lg p-12 bg-muted/20 cursor-pointer hover:bg-muted relative ${errors.posterImage ? "border-red-500" : ""}`}>
             <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer">
               {posterImage ? (
                 <img src={posterImage} alt="Poster" className="w-full h-full object-cover rounded" />
@@ -81,29 +119,34 @@ export default function AddPosterDialog({ children }) {
                 onChange={handleImageChange}
               />
             </label>
+            {errors.posterImage && <p className="text-red-500 text-sm mt-1">{errors.posterImage}</p>}
           </div>
 
           {/* Poster Name */}
-          <Input
-            placeholder="Poster Name"
-            value={posterName}
-            onChange={(e) => setPosterName(e.target.value)}
-          />
+          <div>
+            <Input
+              placeholder="Poster Name"
+              value={posterName}
+              onChange={(e) => setPosterName(e.target.value)}
+              className={errors.posterName ? "border-red-500" : ""}
+            />
+            {errors.posterName && <p className="text-red-500 text-sm mt-1">{errors.posterName}</p>}
+          </div>
         </form>
 
         <AlertDialogFooter className="mt-6">
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel onClick={() => setIsOpen(false)}>Cancel</AlertDialogCancel>
           <AlertDialogAction asChild>
             <Button
               type="submit"
               onClick={handleSubmit}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
-              Create
+              {initialData ? "Save Changes" : "Create"}
             </Button>
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
+  );
 }

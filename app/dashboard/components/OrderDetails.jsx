@@ -3,26 +3,28 @@
 import { FileText, Clock, CheckCircle, XCircle, Truck, PackageCheck } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
 
-// Component for displaying order details and the pie chart
-const OrderDetails = () => {
+const OrderDetails = ({ orders = [] }) => {
+  const orderCounts = {
+    all: orders.length,
+    pending: orders.filter(o => o.status === 'Pending').length,
+    processed: orders.filter(o => o.status === 'Processed').length,
+    cancelled: orders.filter(o => o.status === 'Cancelled').length,
+    shipped: orders.filter(o => o.status === 'Shipped').length,
+    delivered: orders.filter(o => o.status === 'Delivered').length,
+  };
+
   const orderItems = [
-    { title: "All Orders", count: 10, icon: FileText, color: "text-purple-500", value: 10 },
-    { title: "Pending Orders", count: 3, icon: Clock, color: "text-yellow-500", value: 3 },
-    { title: "Processed Orders", count: 5, icon: CheckCircle, color: "text-blue-500", value: 5 },
-    { title: "Cancelled Orders", count: 2, icon: XCircle, color: "text-red-500", value: 2 },
-    { title: "Shipped Orders", count: 0, icon: Truck, color: "text-indigo-500", value: 0 },
-    { title: "Delivered Orders", count: 0, icon: PackageCheck, color: "text-green-500", value: 0 },
+    { title: "All Orders", count: orderCounts.all, icon: FileText, color: "text-purple-500" },
+    { title: "Pending Orders", count: orderCounts.pending, icon: Clock, color: "text-yellow-500" },
+    { title: "Processed Orders", count: orderCounts.processed, icon: CheckCircle, color: "text-blue-500" },
+    { title: "Cancelled Orders", count: orderCounts.cancelled, icon: XCircle, color: "text-red-500" },
+    { title: "Shipped Orders", count: orderCounts.shipped, icon: Truck, color: "text-indigo-500" },
+    { title: "Delivered Orders", count: orderCounts.delivered, icon: PackageCheck, color: "text-green-500" },
   ];
 
   const COLORS = ['#8884d8', '#ffc658', '#82ca9d', '#ff7300', '#00c49f', '#a29bfe'];
-
   const totalOrders = orderItems.reduce((acc, item) => acc + item.count, 0);
-
-  // Keep zero values in data
-  const pieChartData = orderItems.map(item => ({
-    name: item.title,
-    value: item.count,
-  }));
+  const pieChartData = orderItems.map(item => ({ name: item.title, value: item.count }));
 
   return (
     <aside className="w-92 h-screen bg-[#1e2235] text-white p-6 fixed right-0 top-0 flex flex-col">
@@ -64,7 +66,7 @@ const OrderDetails = () => {
               <item.icon className={`w-5 h-5 ${item.color}`} />
               <span className="text-sm">{item.title}</span>
             </div>
-            <span className="text-gray-400 text-xs">{item.count} Files</span>
+            <span className="text-gray-400 text-xs">{item.count} Orders</span>
           </div>
         ))}
       </div>

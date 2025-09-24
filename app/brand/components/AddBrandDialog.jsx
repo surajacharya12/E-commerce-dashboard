@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,70 +9,115 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select"
-import { storeApi } from "@/lib/utils"
 
-export default function AddBrandDialog({ children }) {
-  const [selectedCategory, setSelectedCategory] = useState("")
+export default function AddBrandDialog({ children, onAddBrand, onEditBrand, initialData, subcategories }) {
+  const [selectedSubcategory, setSelectedSubcategory] = useState("")
   const [brandName, setBrandName] = useState("")
-  const subcategories = storeApi.getAll().subcategories
+  const [isOpen, setIsOpen] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    if (initialData) {
+      setSelectedSubcategory(initialData.subcategoryId || "");
+      setBrandName(initialData.name || "");
+    } else {
+      setSelectedSubcategory("");
+      setBrandName("");
+    }
+    setErrors({});
+  }, [initialData, isOpen]);
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!selectedSubcategory) {
+      newErrors.subcategory = "Please select a subcategory.";
+    }
+    if (!brandName.trim()) {
+      newErrors.brandName = "Brand name is required.";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    if (!selectedCategory || !brandName) return
-    storeApi.addBrand(selectedCategory, brandName)
-    setSelectedCategory("")
-    setBrandName("")
-  }
+    e.preventDefault();
+    if (!validateForm()) {
+      return;
+    }
+
+    const newBrand = {
+      id: initialData?.id || Date.now(),
+      subcategoryId: selectedSubcategory,
+      name: brandName,
+      date: initialData?.date || new Date().toISOString().split('T')[0],
+    };
+
+    if (initialData) {
+      onEditBrand(newBrand);
+    } else {
+      onAddBrand(newBrand);
+    }
+
+    setIsOpen(false);
+  };
 
   return (
-    <AlertDialog>
+    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       {children}
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-center text-xl font-semibold">
-            ADD BRAND
+            {initialData ? "EDIT BRAND" : "ADD BRAND"}
           </AlertDialogTitle>
         </AlertDialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div className="grid grid-cols-2 gap-4">
-            <Select onValueChange={setSelectedCategory} value={selectedCategory}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select Sub Category" />
-              </SelectTrigger>
-              <SelectContent>
-                {subcategories.length === 0 ? (
-                  <SelectItem value="__no_subcategories__" disabled>No subcategories found</SelectItem>
-                ) : (
-                  subcategories.map((s) => (
-                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
-
-            <Input
-              placeholder="Brand Name"
-              value={brandName}
-              onChange={(e) => setBrandName(e.target.value)}
-            />
+            <div>
+              <Select onValueChange={setSelectedSubcategory} value={selectedSubcategory}>
+                <SelectTrigger className={errors.subcategory ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Select Sub Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {subcategories.length === 0 ? (
+                    <SelectItem value="__no_subcategories__" disabled>No subcategories found</SelectItem>
+                  ) : (
+                    subcategories.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+              {errors.subcategory && <p className="text-red-500 text-sm mt-1">{errors.subcategory}</p>}
+            </div>
+            <div>
+              <Input
+                placeholder="Brand Name"
+                value={brandName}
+                onChange={(e) => setBrandName(e.target.value)}
+                className={errors.brandName ? "border-red-500" : ""}
+              />
+              {errors.brandName && <p className="text-red-500 text-sm mt-1">{errors.brandName}</p>}
+            </div>
           </div>
-
-          <AlertDialogFooter className="mt-6">
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction asChild>
-              <Button type="submit">
-                Submit
-              </Button>
-            </AlertDialogAction>
-          </AlertDialogFooter>
         </form>
+
+        <AlertDialogFooter className="mt-6">
+          <AlertDialogCancel onClick={() => setIsOpen(false)}>Cancel</AlertDialogCancel>
+          <AlertDialogAction asChild>
+            <Button
+              type="submit"
+              onClick={handleSubmit}
+            >
+              {initialData ? "Save Changes" : "Submit"}
+            </Button>
+          </AlertDialogAction>
+        </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
+  );
 }

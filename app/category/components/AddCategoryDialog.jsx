@@ -1,43 +1,79 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
+  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { storeApi } from "@/lib/utils"
 
-export default function AddCategoryDialog({ children }) {
-  const [image, setImage] = useState(null)
-  const [categoryName, setCategoryName] = useState("")
+export default function AddCategoryDialog({ children, onAddCategory, onEditCategory, initialData }) {
+  const [image, setImage] = useState(null);
+  const [categoryName, setCategoryName] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (initialData) {
+      setImage(initialData.image || null);
+      setCategoryName(initialData.name || "");
+    } else {
+      setImage(null);
+      setCategoryName("");
+    }
+    setError("");
+  }, [initialData, isOpen]);
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
-      setImage(URL.createObjectURL(e.target.files[0]))
+      setImage(URL.createObjectURL(e.target.files[0]));
     }
-  }
+  };
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    if (!categoryName) return
-    storeApi.addCategory(categoryName)
-    // You would typically reset the form after a successful submission
-  }
+    e.preventDefault();
+    if (!categoryName.trim()) {
+      setError("Category name cannot be empty.");
+      return;
+    }
+    
+    // Optional: Add image validation if it's required
+    // if (!image) {
+    //   setError("Category image is required.");
+    //   return;
+    // }
+
+    const newCategory = {
+      id: initialData?.id || Date.now(),
+      name: categoryName,
+      image: image,
+      date: initialData?.date || new Date().toISOString().split('T')[0],
+    };
+
+    if (initialData) {
+      onEditCategory(newCategory);
+    } else {
+      onAddCategory(newCategory);
+    }
+
+    setIsOpen(false);
+    setError("");
+  };
 
   return (
-    <AlertDialog>
+    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       {children}
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-center text-xl font-semibold">
-            ADD CATEGORY
+            {initialData ? "EDIT CATEGORY" : "ADD CATEGORY"}
           </AlertDialogTitle>
         </AlertDialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
@@ -77,21 +113,26 @@ export default function AddCategoryDialog({ children }) {
           <Input
             placeholder="Category Name"
             value={categoryName}
-            onChange={(e) => setCategoryName(e.target.value)}
+            onChange={(e) => {
+              setCategoryName(e.target.value);
+              if (error) setError("");
+            }}
+            className={error ? "border-red-500" : ""}
           />
+          {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
         </form>
         <AlertDialogFooter className="mt-6">
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel onClick={() => setIsOpen(false)}>Cancel</AlertDialogCancel>
           <AlertDialogAction asChild>
             <Button
               type="submit"
               onClick={handleSubmit}
             >
-              Create
+              {initialData ? "Save Changes" : "Create"}
             </Button>
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
+  );
 }

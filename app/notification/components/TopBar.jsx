@@ -15,5 +15,4 @@ const TopBar = ({ total }) => {
     </div>
   )
 }
-
-export default TopBar
+export default TopBar;

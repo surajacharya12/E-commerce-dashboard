@@ -14,39 +14,57 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-
 export default function NotificationDialog({ open, mode, notification, onAction, onClose }) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [sendPush, setSendPush] = useState(false)
   const [imageFile, setImageFile] = useState(null)
   const [preview, setPreview] = useState(null)
-
+  const [errors, setErrors] = useState({})
   useEffect(() => {
-    if (mode === 'edit' && notification) {
-      setTitle(notification.title)
-      setDescription(notification.description)
-      setPreview(notification.imageUrl)
-      setSendPush(false)
-    } else {
-      setTitle("")
-      setDescription("")
-      setPreview(null)
-      setImageFile(null)
-      setSendPush(false)
+    if (open) {
+      if (mode === 'edit' && notification) {
+        setTitle(notification.title)
+        setDescription(notification.description)
+        setPreview(notification.imageUrl)
+        setSendPush(false)
+        setImageFile(null)
+      } else {
+        setTitle("")
+        setDescription("")
+        setPreview(null)
+        setImageFile(null)
+        setSendPush(false)
+      }
+      setErrors({})
     }
   }, [mode, notification, open])
-
   const handleImageChange = (e) => {
     const file = e.target.files?.[0]
     if (file) {
       setImageFile(file)
       setPreview(URL.createObjectURL(file))
+      if (errors.imageFile) {
+        setErrors((prevErrors) => ({ ...prevErrors, imageFile: "" }));
+      }
     }
   }
-
+  const validateForm = () => {
+    const newErrors = {};
+    if (!title.trim()) {
+      newErrors.title = "Notification title is required.";
+    }
+    if (!description.trim()) {
+      newErrors.description = "Notification description is required.";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
   const handleSubmit = (e) => {
-    e.preventDefault()
+    e.preventDefault();
+    if (!validateForm()) {
+      return;
+    }
     const formData = new FormData()
     formData.append("title", title)
     formData.append("description", description)
@@ -56,10 +74,8 @@ export default function NotificationDialog({ open, mode, notification, onAction,
     }
     onAction(formData)
   }
-
   const dialogTitle = mode === 'edit' ? "Edit Notification" : "Add Notification";
   const actionButtonText = mode === 'edit' ? "Save" : "Create";
-
   return (
     <AlertDialog open={open} onOpenChange={onClose}>
       <AlertDialogContent className="max-w-xl">
@@ -69,10 +85,25 @@ export default function NotificationDialog({ open, mode, notification, onAction,
           </AlertDialogTitle>
         </AlertDialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          <Input placeholder="Notification Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
-          <Textarea placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} required />
-          
-          <div className="flex flex-col items-center justify-center border rounded-lg p-6 bg-muted/20 cursor-pointer hover:bg-muted relative">
+          <div>
+            <Input
+              placeholder="Notification Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className={errors.title ? "border-red-500" : ""}
+            />
+            {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
+          </div>
+          <div>
+            <Textarea
+              placeholder="Description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className={errors.description ? "border-red-500" : ""}
+            />
+            {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
+          </div>
+          <div className={`flex flex-col items-center justify-center border rounded-lg p-6 bg-muted/20 cursor-pointer hover:bg-muted relative ${errors.imageFile ? "border-red-500" : ""}`}>
             <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer">
               {preview ? (
                 <img src={preview} alt="Preview" className="w-full h-48 object-cover rounded" />
@@ -87,6 +118,7 @@ export default function NotificationDialog({ open, mode, notification, onAction,
               )}
               <Input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
             </label>
+            {errors.imageFile && <p className="text-red-500 text-sm mt-1">{errors.imageFile}</p>}
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox id="push" checked={sendPush} onCheckedChange={setSendPush} />

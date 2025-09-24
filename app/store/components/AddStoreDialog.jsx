@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select"
 import {
-  Store,
+  Store as StoreIcon,
   Building2,
   Building,
   ShoppingBag,
@@ -24,7 +24,30 @@ import {
   Warehouse,
 } from "lucide-react"
 
-export default function AddStoreDialog({ children }) {
+// Store badge options using Lucide-React icons
+const storeBadges = [
+  { name: "Store", value: "Store", icon: StoreIcon },
+  { name: "Building 2", value: "Building2", icon: Building2 },
+  { name: "Building", value: "Building", icon: Building },
+  { name: "Shopping Bag", value: "ShoppingBag", icon: ShoppingBag },
+  { name: "Shopping Cart", value: "ShoppingCart", icon: ShoppingCart },
+  { name: "Package", value: "Package", icon: Package },
+  { name: "Warehouse", value: "Warehouse", icon: Warehouse },
+]
+
+// Predefined gradient color combinations in Tailwind format
+const gradientOptions = [
+  { name: 'Blue to Purple', value: 'from-blue-500 to-purple-600' },
+  { name: 'Orange to Red', value: 'from-orange-500 to-red-600' },
+  { name: 'Green to Teal', value: 'from-green-500 to-teal-600' },
+  { name: 'Pink to Orange', value: 'from-pink-500 to-orange-400' },
+  { name: 'Indigo to Blue', value: 'from-indigo-600 to-blue-500' },
+  { name: 'Purple to Pink', value: 'from-purple-600 to-pink-500' },
+  { name: 'Teal to Green', value: 'from-teal-500 to-green-600' },
+  { name: 'Amber to Orange', value: 'from-amber-500 to-orange-600' },
+];
+
+export default function AddStoreDialog({ children, onAddStore, onEditStore, initialData }) {
   const [storeName, setStoreName] = useState("")
   const [storeManagerName, setStoreManagerName] = useState("")
   const [storeEmail, setStoreEmail] = useState("")
@@ -34,6 +57,34 @@ export default function AddStoreDialog({ children }) {
   const [storeBadge, setStoreBadge] = useState("")
   const [storeManagerPhoto, setStoreManagerPhoto] = useState(null)
   const [gradientColor, setGradientColor] = useState("")
+  const [isOpen, setIsOpen] = useState(false)
+  const [errors, setErrors] = useState({}) // State to store validation errors
+
+  useEffect(() => {
+    if (initialData) {
+      setStoreName(initialData.storeName || "")
+      setStoreManagerName(initialData.storeManagerName || "")
+      setStoreEmail(initialData.storeEmail || "")
+      setStorePhoneNumber(initialData.storePhoneNumber || "")
+      setStoreDescription(initialData.storeDescription || "")
+      setStoreLocation(initialData.storeLocation || "")
+      setStoreBadge(initialData.storeBadge || "")
+      setStoreManagerPhoto(initialData.storeManagerPhoto || null)
+      setGradientColor(initialData.gradientColor || "")
+    } else {
+      // Reset form when adding a new store
+      setStoreName("")
+      setStoreManagerName("")
+      setStoreEmail("")
+      setStorePhoneNumber("")
+      setStoreDescription("")
+      setStoreLocation("")
+      setStoreBadge("")
+      setStoreManagerPhoto(null)
+      setGradientColor("")
+    }
+    setErrors({}); // Reset errors when dialog opens
+  }, [initialData])
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -41,10 +92,40 @@ export default function AddStoreDialog({ children }) {
     }
   }
 
+  // Validation function
+  const validateForm = () => {
+    const newErrors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^\d{10}$/; // Exactly 10 digits
+
+    if (!storeName.trim()) {
+      newErrors.storeName = "Store name is required.";
+    }
+    if (!storeManagerName.trim()) {
+      newErrors.storeManagerName = "Manager name is required.";
+    }
+    if (!storeEmail.trim() || !emailRegex.test(storeEmail)) {
+      newErrors.storeEmail = "A valid email address is required.";
+    }
+    if (!storePhoneNumber.trim() || !phoneRegex.test(storePhoneNumber)) {
+      newErrors.storePhoneNumber = "Phone number must be exactly 10 digits.";
+    }
+    if (!storeLocation.trim()) {
+      newErrors.storeLocation = "Store location is required.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = (e) => {
-    e.preventDefault()
-    // Handle form submission logic here
-    console.log({
+    e.preventDefault();
+    if (!validateForm()) {
+      return;
+    }
+
+    const storeData = {
+      id: initialData?.id || Date.now(),
       storeName,
       storeManagerName,
       storeEmail,
@@ -54,85 +135,99 @@ export default function AddStoreDialog({ children }) {
       storeBadge,
       storeManagerPhoto,
       gradientColor,
-    })
-    // Reset form fields after submission
-    setStoreName("")
-    setStoreManagerName("")
-    setStoreEmail("")
-    setStorePhoneNumber("")
-    setStoreDescription("")
-    setStoreLocation("")
-    setStoreBadge("")
-    setStoreManagerPhoto(null)
-    setGradientColor("")
+      date: new Date().toLocaleDateString(),
+    }
+    if (initialData) {
+      onEditStore(storeData)
+    } else {
+      onAddStore(storeData)
+    }
+    setIsOpen(false);
   }
 
-  // Store badge options using Lucide-React icons
-  const storeBadges = [
-    { name: "Store", value: "Store", icon: Store },
-    { name: "Building 2", value: "Building2", icon: Building2 },
-    { name: "Building", value: "Building", icon: Building },
-    { name: "Shopping Bag", value: "ShoppingBag", icon: ShoppingBag },
-    { name: "Shopping Cart", value: "ShoppingCart", icon: ShoppingCart },
-    { name: "Package", value: "Package", icon: Package },
-    { name: "Warehouse", value: "Warehouse", icon: Warehouse },
-  ]
-
-  // Predefined gradient color combinations in Tailwind format
-  const gradientOptions = [
-    { name: 'Blue to Purple', value: 'from-blue-500 to-purple-600' },
-    { name: 'Orange to Red', value: 'from-orange-500 to-red-600' },
-    { name: 'Green to Teal', value: 'from-green-500 to-teal-600' },
-    { name: 'Pink to Orange', value: 'from-pink-500 to-orange-400' },
-    { name: 'Indigo to Blue', value: 'from-indigo-600 to-blue-500' },
-    { name: 'Purple to Pink', value: 'from-purple-600 to-pink-500' },
-    { name: 'Teal to Green', value: 'from-teal-500 to-green-600' },
-    { name: 'Amber to Orange', value: 'from-amber-500 to-orange-600' },
-  ];
-
   return (
-    <AlertDialog>
+    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       {children}
-      <AlertDialogContent className="max-w-3xl">
+      <AlertDialogContent className="max-w-3xl overflow-y-auto max-h-[90vh]">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-center text-xl font-semibold">
-            ADD STORE
+            {initialData ? "EDIT STORE" : "ADD STORE"}
           </AlertDialogTitle>
         </AlertDialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          <Input
-            placeholder="Store Name"
-            value={storeName}
-            onChange={(e) => setStoreName(e.target.value)}
-          />
-          <Input
-            placeholder="Store Manager Name"
-            value={storeManagerName}
-            onChange={(e) => setStoreManagerName(e.target.value)}
-          />
-          <Input
-            placeholder="Store Email Address"
-            type="email"
-            value={storeEmail}
-            onChange={(e) => setStoreEmail(e.target.value)}
-          />
-          <Input
-            placeholder="Store Phone Number"
-            type="tel"
-            value={storePhoneNumber}
-            onChange={(e) => setStorePhoneNumber(e.target.value)}
-          />
+          <div>
+            <Input
+              placeholder="Store Name"
+              value={storeName}
+              onChange={(e) => {
+                setStoreName(e.target.value);
+                setErrors(prev => ({ ...prev, storeName: null }));
+              }}
+              className={errors.storeName ? "border-red-500" : ""}
+            />
+            {errors.storeName && <p className="text-red-500 text-sm mt-1">{errors.storeName}</p>}
+          </div>
+
+          <div>
+            <Input
+              placeholder="Store Manager Name"
+              value={storeManagerName}
+              onChange={(e) => {
+                setStoreManagerName(e.target.value);
+                setErrors(prev => ({ ...prev, storeManagerName: null }));
+              }}
+              className={errors.storeManagerName ? "border-red-500" : ""}
+            />
+            {errors.storeManagerName && <p className="text-red-500 text-sm mt-1">{errors.storeManagerName}</p>}
+          </div>
+
+          <div>
+            <Input
+              placeholder="Store Email Address"
+              type="email"
+              value={storeEmail}
+              onChange={(e) => {
+                setStoreEmail(e.target.value);
+                setErrors(prev => ({ ...prev, storeEmail: null }));
+              }}
+              className={errors.storeEmail ? "border-red-500" : ""}
+            />
+            {errors.storeEmail && <p className="text-red-500 text-sm mt-1">{errors.storeEmail}</p>}
+          </div>
+
+          <div>
+            <Input
+              placeholder="Store Phone Number"
+              type="tel"
+              value={storePhoneNumber}
+              onChange={(e) => {
+                setStorePhoneNumber(e.target.value);
+                setErrors(prev => ({ ...prev, storePhoneNumber: null }));
+              }}
+              className={errors.storePhoneNumber ? "border-red-500" : ""}
+            />
+            {errors.storePhoneNumber && <p className="text-red-500 text-sm mt-1">{errors.storePhoneNumber}</p>}
+          </div>
+
           <Textarea
             placeholder="Description"
             value={storeDescription}
             onChange={(e) => setStoreDescription(e.target.value)}
           />
-          <Input
-            placeholder="Store Location"
-            value={storeLocation}
-            onChange={(e) => setStoreLocation(e.target.value)}
-          />
+
+          <div>
+            <Input
+              placeholder="Store Location"
+              value={storeLocation}
+              onChange={(e) => {
+                setStoreLocation(e.target.value);
+                setErrors(prev => ({ ...prev, storeLocation: null }));
+              }}
+              className={errors.storeLocation ? "border-red-500" : ""}
+            />
+            {errors.storeLocation && <p className="text-red-500 text-sm mt-1">{errors.storeLocation}</p>}
+          </div>
 
           {/* Store Manager Photo Upload */}
           <div className="flex flex-col items-center justify-center border rounded-lg p-6 bg-muted/20 cursor-pointer hover:bg-muted relative">
@@ -224,15 +319,15 @@ export default function AddStoreDialog({ children }) {
           </div>
         </form>
 
-          <AlertDialogFooter className="mt-6">
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+        <AlertDialogFooter className="mt-6">
+          <AlertDialogCancel onClick={() => setIsOpen(false)}>Cancel</AlertDialogCancel>
           <AlertDialogAction asChild>
             <Button
               type="submit"
               onClick={handleSubmit}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
-              Submit
+              {initialData ? "Save Changes" : "Submit"}
             </Button>
           </AlertDialogAction>
         </AlertDialogFooter>

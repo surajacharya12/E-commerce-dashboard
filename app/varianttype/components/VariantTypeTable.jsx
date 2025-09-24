@@ -1,22 +1,40 @@
+"use client"
+
 import { Edit, Trash2, RefreshCw, Plus } from "lucide-react";
 import VariantTypeTableDialog from "./VariantTypeTableDialog";
 import { AlertDialogTrigger } from "@/components/ui/alert-dialog";
-// Component for the products table
 
-const VariantTypeTable = () => {
+const VariantTypeTable = ({ variantTypes, setVariantTypes, editingVariant, setEditingVariant }) => {
+  const handleAddVariant = (newVariant) => {
+    setVariantTypes([...variantTypes, { ...newVariant, id: Date.now(), date: new Date().toISOString().split('T')[0] }]);
+    setEditingVariant(null);
+  };
+
+  const handleEditVariant = (updatedVariant) => {
+    setVariantTypes(variantTypes.map(variant => variant.id === updatedVariant.id ? updatedVariant : variant));
+    setEditingVariant(null);
+  };
+
+  const handleDeleteVariant = (id) => {
+    setVariantTypes(variantTypes.filter(variant => variant.id !== id));
+  };
+
+  const handleRefresh = () => {
+    setVariantTypes([]);
+  };
+
   return (
     <div>
       {/* Header section */}
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-xl font-semibold text-gray-300">My VariantType</h2>
         <div className="flex items-center gap-8">
-          <button className="p-2 rounded-lg bg-[#2a2f45] hover:bg-[#353b52] border border-gray-700">
+          <button onClick={handleRefresh} className="p-2 rounded-lg bg-[#2a2f45] hover:bg-[#353b52] border border-gray-700">
             <RefreshCw className="h-5 w-5 text-gray-300" />
           </button>
-         {/* Add Product Dialog with "Add New" button as trigger */}
-          <VariantTypeTableDialog>
+          <VariantTypeTableDialog onAddVariant={handleAddVariant} onEditVariant={handleEditVariant} initialData={editingVariant}>
             <AlertDialogTrigger asChild>
-              <button className="flex items-center gap-5 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-medium shadow">
+              <button onClick={() => setEditingVariant(null)} className="flex items-center gap-5 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-medium shadow">
                 <Plus className="h-5 w-5" /> Add New
               </button>
             </AlertDialogTrigger>
@@ -25,48 +43,47 @@ const VariantTypeTable = () => {
       </div>
 
       {/* Table section */}
-      <div className="bg-[#2a2f45] rounded-xl shadow overflow-hidden border border-gray-700">
-        <table className="w-full text-left border-collapse">
+      <div className="bg-[#2a2f45] rounded-xl shadow overflow-x-auto border border-gray-700 w-full">
+        <table className="min-w-[1370px] text-left border-collapse">
           <thead className="bg-[#1e2235]">
             <tr>
               <th className="px-12 py-6 text-sm font-semibold text-gray-300">Variant Name</th>
-              <th className="px-12 py-3 text-sm font-semibold text-gray-300">VariantType</th>
+              <th className="px-12 py-3 text-sm font-semibold text-gray-300">Variant Type</th>
               <th className="px-12 py-3 text-sm font-semibold text-gray-300">Date</th>
               <th className="px-40 py-3 text-sm font-semibold text-gray-300">Edit</th>
               <th className="px-6 py-3 text-sm font-semibold text-gray-300">Delete</th>
             </tr>
           </thead>
           <tbody>
-            <tr className="border-t border-gray-700">
-              <td className="px-12 py-4">iPhone 15 Pro</td>
-              <td className="px-12 py-4">Mobiles</td>
-              <td className="px-12 py-4">Mobiles</td>
-              <td className="px-40 py-4">
-                <button className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white">
-                  <Edit className="h-4 w-4" />
-                </button>
-              </td>
-              <td className="px-6 py-4">
-                <button className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white">
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </td>
-            </tr>
-            <tr className="border-t border-gray-700">
-              <td className="px-12 py-4">Nike Air Max</td>
-              <td className="px-12 py-4">Footwear</td>
-              <td className="px-12 py-4">Mobiles</td>
-              <td className="px-40 py-4">
-                <button className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white">
-                  <Edit className="h-4 w-4" />
-                </button>
-              </td>
-              <td className="px-6 py-4">
-                <button className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white">
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </td>
-            </tr>
+            {variantTypes.length === 0 ? (
+              <tr className="border-t border-gray-700">
+                <td colSpan="5" className="px-12 py-4 text-center text-gray-400">
+                  No variant types found.
+                </td>
+              </tr>
+            ) : (
+              variantTypes.map((variant) => (
+                <tr key={variant.id} className="border-t border-gray-700">
+                  <td className="px-12 py-4">{variant.name}</td>
+                  <td className="px-12 py-4">{variant.type}</td>
+                  <td className="px-12 py-4">{variant.date}</td>
+                  <td className="px-40 py-4">
+                    <VariantTypeTableDialog onAddVariant={handleAddVariant} onEditVariant={handleEditVariant} initialData={variant}>
+                      <AlertDialogTrigger asChild>
+                        <button onClick={() => setEditingVariant(variant)} className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white">
+                          <Edit className="h-4 w-4" />
+                        </button>
+                      </AlertDialogTrigger>
+                    </VariantTypeTableDialog>
+                  </td>
+                  <td className="px-6 py-4">
+                    <button onClick={() => handleDeleteVariant(variant.id)} className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

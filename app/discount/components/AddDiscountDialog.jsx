@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,42 +18,22 @@ import { MdShoppingCart, MdCategory, MdInventory, MdStore, MdLocalMall, MdShoppi
 
 // Icon mapping to connect string names to React components
 const iconMap = {
-  // Category Icons
-  'shopping_cart': MdShoppingCart,
-  'category': MdCategory,
-  'inventory': MdInventory,
-  'store': MdStore,
-  'local_mall': MdLocalMall,
-  'shopping_bag': MdShoppingBag,
-  'storefront': MdStorefront,
-  'business': MdBusiness,
-  // Discount Icons
-  'local_offer': MdLocalOffer,
-  'discount': MdDiscount,
-  'percent': MdPercent,
-  'sell': MdSell,
-  'price_change': MdPriceChange,
-  'monetization_on': MdMonetizationOn,
-  'attach_money': MdAttachMoney,
-  'savings': MdSavings,
-  // Deal Icons
-  'flash_on': MdFlashOn,
-  'star': MdStar,
-  'favorite': MdFavorite,
-  'thumb_up': MdThumbUp,
-  'celebration': MdCelebration,
-  'card_giftcard': MdCardGiftcard,
-  'redeem': MdRedeem,
-  'loyalty': MdLoyalty,
-  // Default
-  'help_outline': MdHelpOutline,
+  'shopping_cart': MdShoppingCart, 'category': MdCategory, 'inventory': MdInventory,
+  'store': MdStore, 'local_mall': MdLocalMall, 'shopping_bag': MdShoppingBag,
+  'storefront': MdStorefront, 'business': MdBusiness, 'local_offer': MdLocalOffer,
+  'discount': MdDiscount, 'percent': MdPercent, 'sell': MdSell,
+  'price_change': MdPriceChange, 'monetization_on': MdMonetizationOn,
+  'attach_money': MdAttachMoney, 'savings': MdSavings, 'flash_on': MdFlashOn,
+  'star': MdStar, 'favorite': MdFavorite, 'thumb_up': MdThumbUp,
+  'celebration': MdCelebration, 'card_giftcard': MdCardGiftcard,
+  'redeem': MdRedeem, 'loyalty': MdLoyalty, 'help_outline': MdHelpOutline,
 };
 
 const _categoryIcons = Object.keys(iconMap).slice(0, 8);
 const _discountIcons = Object.keys(iconMap).slice(8, 16);
 const _dealIcons = Object.keys(iconMap).slice(16, 24);
 
-export default function AddDiscountDialog({ children }) {
+export default function AddDiscountDialog({ children, onAddDiscount, onEditDiscount, initialData }) {
   const [discountPercentage, setDiscountPercentage] = useState("");
   const [description, setDescription] = useState("");
   const [discountName, setDiscountName] = useState("");
@@ -61,17 +41,67 @@ export default function AddDiscountDialog({ children }) {
   const [discountPhoto, setDiscountPhoto] = useState(null);
   const [discountIcon, setDiscountIcon] = useState("");
   const [dealIcon, setDealIcon] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    if (initialData) {
+      setDiscountPercentage(initialData.discountPercentage || "");
+      setDescription(initialData.description || "");
+      setDiscountName(initialData.discountName || "");
+      setCategoryIcon(initialData.categoryIcon || "");
+      setDiscountPhoto(initialData.discountPhoto || null);
+      setDiscountIcon(initialData.discountIcon || "");
+      setDealIcon(initialData.dealIcon || "");
+    } else {
+      setDiscountPercentage("");
+      setDescription("");
+      setDiscountName("");
+      setCategoryIcon("");
+      setDiscountPhoto(null);
+      setDiscountIcon("");
+      setDealIcon("");
+    }
+    setErrors({});
+  }, [initialData, isOpen]);
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       setDiscountPhoto(URL.createObjectURL(e.target.files[0]));
     }
+    if (errors.discountPhoto) {
+      setErrors((prevErrors) => ({ ...prevErrors, discountPhoto: "" }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!discountName.trim()) {
+      newErrors.discountName = "Discount Name is required.";
+    }
+    if (!discountPercentage.trim() || isNaN(parseFloat(discountPercentage)) || parseFloat(discountPercentage) < 0 || parseFloat(discountPercentage) > 100) {
+      newErrors.discountPercentage = "Please enter a valid number between 0 and 100.";
+    }
+    if (!categoryIcon) {
+      newErrors.categoryIcon = "Please select a Category Icon.";
+    }
+    if (!discountPhoto && !initialData?.discountPhoto) {
+      newErrors.discountPhoto = "A discount photo is required.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Here you would handle the form submission, e.g., send data to an API
-    console.log({
+    if (!validateForm()) {
+      return;
+    }
+
+    const discountData = {
+      id: initialData?.id || Date.now(),
       discountPercentage,
       description,
       discountName,
@@ -79,15 +109,15 @@ export default function AddDiscountDialog({ children }) {
       discountPhoto,
       discountIcon,
       dealIcon,
-    });
-    // Reset state after submission
-    setDiscountPercentage("");
-    setDescription("");
-    setDiscountName("");
-    setCategoryIcon("");
-    setDiscountPhoto(null);
-    setDiscountIcon("");
-    setDealIcon("");
+      date: new Date().toLocaleDateString(),
+    };
+
+    if (initialData) {
+      onEditDiscount(discountData);
+    } else {
+      onAddDiscount(discountData);
+    }
+    setIsOpen(false);
   };
 
   const renderIcon = (iconName) => {
@@ -96,22 +126,26 @@ export default function AddDiscountDialog({ children }) {
   };
 
   return (
-    <AlertDialog>
+    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       {children}
       <AlertDialogContent className="max-w-xl">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-center text-xl font-semibold">
-            ADD DISCOUNT
+            {initialData ? "EDIT DISCOUNT" : "ADD DISCOUNT"}
           </AlertDialogTitle>
         </AlertDialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div className="grid grid-cols-2 gap-4">
-            <Input
-              placeholder="Discount Percentage (%)"
-              type="number"
-              value={discountPercentage}
-              onChange={(e) => setDiscountPercentage(e.target.value)}
-            />
+            <div>
+              <Input
+                placeholder="Discount Percentage (%)"
+                type="number"
+                value={discountPercentage}
+                onChange={(e) => setDiscountPercentage(e.target.value)}
+                className={errors.discountPercentage ? "border-red-500" : ""}
+              />
+              {errors.discountPercentage && <p className="text-red-500 text-sm mt-1">{errors.discountPercentage}</p>}
+            </div>
             <Textarea
               placeholder="Description"
               value={description}
@@ -119,28 +153,35 @@ export default function AddDiscountDialog({ children }) {
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Input
-              placeholder="Discount Name"
-              value={discountName}
-              onChange={(e) => setDiscountName(e.target.value)}
-            />
-            <Select onValueChange={setCategoryIcon} value={categoryIcon}>
-              <SelectTrigger>
-                <SelectValue placeholder="Category Icon" />
-              </SelectTrigger>
-              <SelectContent>
-                {_categoryIcons.map((icon) => (
-                  <SelectItem key={icon} value={icon}>
-                    <div className="flex items-center">
-                      {renderIcon(icon)}
-                      <span>{icon.replace(/_/g, " ").toUpperCase()}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div>
+              <Input
+                placeholder="Discount Name"
+                value={discountName}
+                onChange={(e) => setDiscountName(e.target.value)}
+                className={errors.discountName ? "border-red-500" : ""}
+              />
+              {errors.discountName && <p className="text-red-500 text-sm mt-1">{errors.discountName}</p>}
+            </div>
+            <div>
+              <Select onValueChange={setCategoryIcon} value={categoryIcon}>
+                <SelectTrigger className={errors.categoryIcon ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Category Icon" />
+                </SelectTrigger>
+                <SelectContent>
+                  {_categoryIcons.map((icon) => (
+                    <SelectItem key={icon} value={icon}>
+                      <div className="flex items-center">
+                        {renderIcon(icon)}
+                        <span>{icon.replace(/_/g, " ").toUpperCase()}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.categoryIcon && <p className="text-red-500 text-sm mt-1">{errors.categoryIcon}</p>}
+            </div>
           </div>
-          <div className="flex items-center justify-center border rounded-lg p-6 bg-muted/20 cursor-pointer hover:bg-muted relative">
+          <div className="flex flex-col items-center justify-center border rounded-lg p-6 bg-muted/20 cursor-pointer hover:bg-muted relative">
             <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer">
               {discountPhoto ? (
                 <img src={discountPhoto} alt="Discount" className="w-full h-full object-cover rounded" />
@@ -171,6 +212,7 @@ export default function AddDiscountDialog({ children }) {
               )}
               <Input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
             </label>
+            {errors.discountPhoto && <p className="text-red-500 text-sm mt-1">{errors.discountPhoto}</p>}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <Select onValueChange={setDiscountIcon} value={discountIcon}>
@@ -206,10 +248,10 @@ export default function AddDiscountDialog({ children }) {
           </div>
         </form>
         <AlertDialogFooter className="mt-6">
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel onClick={() => setIsOpen(false)}>Cancel</AlertDialogCancel>
           <AlertDialogAction asChild>
             <Button type="submit" onClick={handleSubmit}>
-              Submit
+              {initialData ? "Save Changes" : "Submit"}
             </Button>
           </AlertDialogAction>
         </AlertDialogFooter>
