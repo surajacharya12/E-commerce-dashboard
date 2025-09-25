@@ -2,12 +2,11 @@
 
 import { Search } from "lucide-react";
 
-const TopBar = ({ pageTitle, itemCount, searchTerm, setSearchTerm }) => {
+const TopBar = ({ pageTitle, itemCount, searchTerm, setSearchTerm, icon: Icon }) => {
   return (
     <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
       <h1 className="text-3xl font-bold text-white">{pageTitle}</h1>
       <div className="flex flex-wrap items-center gap-8">
-        {/* Search */}
         <div className="relative">
           <input
             type="text"
@@ -19,6 +18,7 @@ const TopBar = ({ pageTitle, itemCount, searchTerm, setSearchTerm }) => {
           <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
         </div>
         <p className="text-gray-400 text-sm">Total {pageTitle}s: {itemCount}</p>
+        {Icon && <Icon className="h-5 w-5 text-gray-300" />}
       </div>
     </div>
   );

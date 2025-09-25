@@ -1,68 +1,78 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select"
+  AlertDialogFooter,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import url from "../../http/page";
 
-export default function AddSubCategoryDialog({ children, onAddSubCategory, onEditSubCategory, initialData, categories }) {
-  const [selectedCategory, setSelectedCategory] = useState("")
-  const [subCategoryName, setSubCategoryName] = useState("")
+const API_URL = url + "categories";
+
+export default function AddSubCategoryDialog({ children, onAddSubCategory, onEditSubCategory, initialData }) {
+  const [categories, setCategories] = useState([]);
+  const [subCategoryName, setSubCategoryName] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(API_URL);
+        if (response.ok) {
+          const data = await response.json();
+          setCategories(data.data);
+        } else {
+          throw new Error("Failed to fetch categories.");
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+    if (isOpen) {
+      fetchCategories();
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (initialData) {
-      setSelectedCategory(initialData.categoryId || "");
       setSubCategoryName(initialData.name || "");
+      setSelectedCategory(initialData.categoryId?._id || "");
     } else {
-      setSelectedCategory("");
       setSubCategoryName("");
+      setSelectedCategory("");
     }
-    setErrors({});
+    setError("");
   }, [initialData, isOpen]);
-
-  const validateForm = () => {
-    const newErrors = {};
-    if (!selectedCategory) {
-      newErrors.category = "Please select a category.";
-    }
-    if (!subCategoryName.trim()) {
-      newErrors.name = "Sub category name is required.";
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!validateForm()) {
+    if (!subCategoryName.trim()) {
+      setError("Sub-category name cannot be empty.");
+      return;
+    }
+    if (!selectedCategory) {
+      setError("Please select a parent category.");
       return;
     }
 
-    const newSubCategory = {
-      id: initialData?.id || Date.now(),
-      categoryId: selectedCategory,
-      name: subCategoryName,
-      date: initialData?.date || new Date().toISOString().split('T')[0],
-    };
-
     if (initialData) {
-      onEditSubCategory(newSubCategory);
+      onEditSubCategory(initialData._id, subCategoryName, selectedCategory);
     } else {
-      onAddSubCategory(newSubCategory);
+      onAddSubCategory(subCategoryName, selectedCategory);
     }
 
     setIsOpen(false);
+    setError("");
   };
 
   return (
@@ -71,37 +81,35 @@ export default function AddSubCategoryDialog({ children, onAddSubCategory, onEdi
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-center text-xl font-semibold">
-            {initialData ? "EDIT SUB CATEGORY" : "ADD SUB CATEGORY"}
+            {initialData ? "EDIT SUB-CATEGORY" : "ADD SUB-CATEGORY"}
           </AlertDialogTitle>
         </AlertDialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Select onValueChange={setSelectedCategory} value={selectedCategory}>
-                <SelectTrigger className={errors.category ? "border-red-500" : ""}>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.length === 0 ? (
-                    <SelectItem value="__no_categories__" disabled>No categories found</SelectItem>
-                  ) : (
-                    categories.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
-              {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category}</p>}
-            </div>
-            <div>
-              <Input
-                placeholder="Sub Category Name"
-                value={subCategoryName}
-                onChange={(e) => setSubCategoryName(e.target.value)}
-                className={errors.name ? "border-red-500" : ""}
-              />
-              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
-            </div>
+          <div>
+            <Input
+              placeholder="Sub-category Name"
+              value={subCategoryName}
+              onChange={(e) => {
+                setSubCategoryName(e.target.value);
+                if (error) setError("");
+              }}
+              className={error ? "border-red-500" : ""}
+            />
+            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+          </div>
+          <div>
+            <Select onValueChange={setSelectedCategory} value={selectedCategory}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select Parent Category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((category) => (
+                  <SelectItem key={category._id} value={category._id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </form>
         <AlertDialogFooter className="mt-6">
@@ -111,11 +119,11 @@ export default function AddSubCategoryDialog({ children, onAddSubCategory, onEdi
               type="submit"
               onClick={handleSubmit}
             >
-              {initialData ? "Save Changes" : "Submit"}
+              {initialData ? "Save Changes" : "Create"}
             </Button>
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
+  );
 }

@@ -48,17 +48,15 @@ export default function VariantTypeTableDialog({ children, onAddVariant, onEditV
       return;
     }
 
-    const newVariant = {
-      id: initialData?.id || Date.now(),
+    const data = {
       name: variantName,
       type: variantType,
-      date: initialData?.date || new Date().toISOString().split('T')[0],
     };
 
     if (initialData) {
-      onEditVariant(newVariant);
+      onEditVariant({ ...data, id: initialData._id });
     } else {
-      onAddVariant(newVariant);
+      onAddVariant(data);
     }
 
     setIsOpen(false);

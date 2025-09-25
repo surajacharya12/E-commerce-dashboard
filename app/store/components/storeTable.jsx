@@ -57,28 +57,36 @@ const StoreTable = ({ stores, setStores, editingStore, setEditingStore }) => {
             </tr>
           </thead>
           <tbody>
-            {stores.map(store => (
-              <tr key={store.id} className="border-t border-gray-700">
-                <td className="px-12 py-4">{store.storeName}</td>
-                <td className="px-12 py-4">{store.storeManagerName}</td>
-                <td className="px-12 py-4">{store.storeLocation}</td>
-                <td className="px-12 py-4">{store.date}</td>
-                <td className="px-12 py-4">
-                  <AddStoreDialog onAddStore={handleAddStore} onEditStore={handleEditStore} initialData={store}>
-                    <AlertDialogTrigger asChild>
-                      <button onClick={() => setEditingStore(store)} className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white">
-                        <Edit className="h-4 w-4" />
-                      </button>
-                    </AlertDialogTrigger>
-                  </AddStoreDialog>
-                </td>
-                <td className="px-6 py-4">
-                  <button onClick={() => handleDeleteStore(store.id)} className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white">
-                        <Trash2 className="h-4 w-4" />
-                  </button>
+            {stores.length === 0 ? (
+              <tr>
+                <td colSpan="6" className="text-center py-6 text-gray-400">
+                  No stores found.
                 </td>
               </tr>
-            ))}
+            ) : (
+              stores.map(store => (
+                <tr key={store.id} className="border-t border-gray-700">
+                  <td className="px-12 py-4">{store.storeName}</td>
+                  <td className="px-12 py-4">{store.storeManagerName}</td>
+                  <td className="px-12 py-4">{store.storeLocation}</td>
+                  <td className="px-12 py-4">{store.date}</td>
+                  <td className="px-12 py-4">
+                    <AddStoreDialog onAddStore={handleAddStore} onEditStore={handleEditStore} initialData={store}>
+                      <AlertDialogTrigger asChild>
+                        <button onClick={() => setEditingStore(store)} className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white">
+                          <Edit className="h-4 w-4" />
+                        </button>
+                      </AlertDialogTrigger>
+                    </AddStoreDialog>
+                  </td>
+                  <td className="px-6 py-4">
+                    <button onClick={() => handleDeleteStore(store.id)} className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white">
+                          <Trash2 className="h-4 w-4" />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

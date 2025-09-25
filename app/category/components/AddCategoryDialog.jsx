@@ -6,34 +6,38 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogFooter,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
 export default function AddCategoryDialog({ children, onAddCategory, onEditCategory, initialData }) {
-  const [image, setImage] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
+  const [imageUrl, setImageUrl] = useState("");
   const [categoryName, setCategoryName] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (initialData) {
-      setImage(initialData.image || null);
+      setImageUrl(initialData.image || "");
       setCategoryName(initialData.name || "");
+      setImageFile(null);
     } else {
-      setImage(null);
+      setImageUrl("");
       setCategoryName("");
+      setImageFile(null);
     }
     setError("");
   }, [initialData, isOpen]);
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
-      setImage(URL.createObjectURL(e.target.files[0]));
+      const file = e.target.files[0];
+      setImageFile(file);
+      setImageUrl(URL.createObjectURL(file));
     }
   };
 
@@ -43,24 +47,15 @@ export default function AddCategoryDialog({ children, onAddCategory, onEditCateg
       setError("Category name cannot be empty.");
       return;
     }
-    
-    // Optional: Add image validation if it's required
-    // if (!image) {
-    //   setError("Category image is required.");
-    //   return;
-    // }
-
-    const newCategory = {
-      id: initialData?.id || Date.now(),
-      name: categoryName,
-      image: image,
-      date: initialData?.date || new Date().toISOString().split('T')[0],
-    };
 
     if (initialData) {
-      onEditCategory(newCategory);
+      onEditCategory(initialData._id, categoryName, imageFile);
     } else {
-      onAddCategory(newCategory);
+      if (!imageFile) {
+        setError("Category image is required.");
+        return;
+      }
+      onAddCategory(categoryName, imageFile);
     }
 
     setIsOpen(false);
@@ -78,9 +73,9 @@ export default function AddCategoryDialog({ children, onAddCategory, onEditCateg
         </AlertDialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <label className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-10 cursor-pointer bg-muted/20 hover:bg-muted">
-            {image ? (
+            {imageUrl ? (
               <img
-                src={image}
+                src={imageUrl}
                 alt="Category Preview"
                 className="w-full h-auto object-cover rounded"
               />
@@ -105,6 +100,7 @@ export default function AddCategoryDialog({ children, onAddCategory, onEditCateg
             )}
             <Input
               type="file"
+              name="img"
               accept="image/*"
               className="hidden"
               onChange={handleImageChange}

@@ -72,32 +72,40 @@ const DiscountTable = ({ discounts, setDiscounts, editingDiscount, setEditingDis
             </tr>
           </thead>
           <tbody>
-            {discounts.map((discount) => (
-              <tr key={discount.id} className="border-t border-gray-700">
-                <td className="px-12 py-4">{discount.discountName}</td>
-                <td className="px-12 py-4">
-                  {discount.discountPhoto && (
-                    <img src={discount.discountPhoto} alt={discount.discountName} className="w-20 h-20 object-cover rounded" />
-                  )}
-                </td>
-                <td className="px-12 py-4">{discount.discountPercentage}%</td>
-                <td className="px-12 py-4">{discount.date}</td>
-                <td className="px-40 py-4">
-                  <AddDiscountDialog onAddDiscount={handleAddDiscount} onEditDiscount={handleEditDiscount} initialData={discount}>
-                    <AlertDialogTrigger asChild>
-                      <button onClick={() => setEditingDiscount(discount)} className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white">
-                        <Edit className="h-4 w-4" />
-                      </button>
-                    </AlertDialogTrigger>
-                  </AddDiscountDialog>
-                </td>
-                <td className="px-6 py-4">
-                  <button onClick={() => handleDeleteDiscount(discount.id)} className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white">
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+            {discounts.length === 0 ? (
+              <tr className="border-t border-gray-700">
+                <td colSpan="6" className="px-12 py-4 text-center text-gray-400">
+                  No discount found.
                 </td>
               </tr>
-            ))}
+            ) : (
+              discounts.map((discount) => (
+                <tr key={discount.id} className="border-t border-gray-700">
+                  <td className="px-12 py-4">{discount.discountName}</td>
+                  <td className="px-12 py-4">
+                    {discount.discountPhoto && (
+                      <img src={discount.discountPhoto} alt={discount.discountName} className="w-20 h-20 object-cover rounded" />
+                    )}
+                  </td>
+                  <td className="px-12 py-4">{discount.discountPercentage}%</td>
+                  <td className="px-12 py-4">{discount.date}</td>
+                  <td className="px-40 py-4">
+                    <AddDiscountDialog onAddDiscount={handleAddDiscount} onEditDiscount={handleEditDiscount} initialData={discount}>
+                      <AlertDialogTrigger asChild>
+                        <button onClick={() => setEditingDiscount(discount)} className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white">
+                          <Edit className="h-4 w-4" />
+                        </button>
+                      </AlertDialogTrigger>
+                    </AddDiscountDialog>
+                  </td>
+                  <td className="px-6 py-4">
+                    <button onClick={() => handleDeleteDiscount(discount.id)} className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

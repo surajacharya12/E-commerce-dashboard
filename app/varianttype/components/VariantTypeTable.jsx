@@ -1,35 +1,75 @@
+// app/varianttype/components/VariantTypeTable.jsx
 "use client"
 
 import { Edit, Trash2, RefreshCw, Plus } from "lucide-react";
 import VariantTypeTableDialog from "./VariantTypeTableDialog";
 import { AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import url from "../../http/page";
 
-const VariantTypeTable = ({ variantTypes, setVariantTypes, editingVariant, setEditingVariant }) => {
-  const handleAddVariant = (newVariant) => {
-    setVariantTypes([...variantTypes, { ...newVariant, id: Date.now(), date: new Date().toISOString().split('T')[0] }]);
-    setEditingVariant(null);
+const VariantTypeTable = ({ variantTypes, fetchVariantTypes, editingVariant, setEditingVariant }) => {
+  const handleAddVariant = async (newVariant) => {
+    try {
+      // Corrected: Removed the leading slash from the path.
+      const response = await fetch(`${url}variantTypes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newVariant),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to add variant type.");
+      }
+      fetchVariantTypes();
+      setEditingVariant(null);
+    } catch (error) {
+      console.error("Error adding variant type:", error);
+    }
   };
 
-  const handleEditVariant = (updatedVariant) => {
-    setVariantTypes(variantTypes.map(variant => variant.id === updatedVariant.id ? updatedVariant : variant));
-    setEditingVariant(null);
+  const handleEditVariant = async (updatedVariant) => {
+    try {
+      // Corrected: Removed the leading slash from the path.
+      const response = await fetch(`${url}variantTypes/${updatedVariant.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: updatedVariant.name, type: updatedVariant.type }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update variant type.");
+      }
+      fetchVariantTypes();
+      setEditingVariant(null);
+    } catch (error) {
+      console.error("Error updating variant type:", error);
+    }
   };
 
-  const handleDeleteVariant = (id) => {
-    setVariantTypes(variantTypes.filter(variant => variant.id !== id));
-  };
-
-  const handleRefresh = () => {
-    setVariantTypes([]);
+  const handleDeleteVariant = async (id) => {
+    try {
+      // Corrected: Removed the leading slash from the path.
+      const response = await fetch(`${url}variantTypes/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to delete variant type.");
+      }
+      fetchVariantTypes();
+    } catch (error) {
+      console.error("Error deleting variant type:", error);
+      alert(error.message);
+    }
   };
 
   return (
     <div>
-      {/* Header section */}
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-xl font-semibold text-gray-300">My VariantType</h2>
         <div className="flex items-center gap-8">
-          <button onClick={handleRefresh} className="p-2 rounded-lg bg-[#2a2f45] hover:bg-[#353b52] border border-gray-700">
+          <button onClick={fetchVariantTypes} className="p-2 rounded-lg bg-[#2a2f45] hover:bg-[#353b52] border border-gray-700">
             <RefreshCw className="h-5 w-5 text-gray-300" />
           </button>
           <VariantTypeTableDialog onAddVariant={handleAddVariant} onEditVariant={handleEditVariant} initialData={editingVariant}>
@@ -42,7 +82,6 @@ const VariantTypeTable = ({ variantTypes, setVariantTypes, editingVariant, setEd
         </div>
       </div>
 
-      {/* Table section */}
       <div className="bg-[#2a2f45] rounded-xl shadow overflow-x-auto border border-gray-700 w-full">
         <table className="min-w-[1370px] text-left border-collapse">
           <thead className="bg-[#1e2235]">
@@ -63,10 +102,10 @@ const VariantTypeTable = ({ variantTypes, setVariantTypes, editingVariant, setEd
               </tr>
             ) : (
               variantTypes.map((variant) => (
-                <tr key={variant.id} className="border-t border-gray-700">
+                <tr key={variant._id} className="border-t border-gray-700">
                   <td className="px-12 py-4">{variant.name}</td>
                   <td className="px-12 py-4">{variant.type}</td>
-                  <td className="px-12 py-4">{variant.date}</td>
+                  <td className="px-12 py-4">{new Date(variant.createdAt).toLocaleDateString()}</td>
                   <td className="px-40 py-4">
                     <VariantTypeTableDialog onAddVariant={handleAddVariant} onEditVariant={handleEditVariant} initialData={variant}>
                       <AlertDialogTrigger asChild>
@@ -77,8 +116,8 @@ const VariantTypeTable = ({ variantTypes, setVariantTypes, editingVariant, setEd
                     </VariantTypeTableDialog>
                   </td>
                   <td className="px-6 py-4">
-                    <button onClick={() => handleDeleteVariant(variant.id)} className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white">
-                      <Trash2 className="h-4 w-4" />
+                    <button onClick={() => handleDeleteVariant(variant._id)} className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white">
+                          <Trash2 className="h-4 w-4" />
                     </button>
                   </td>
                 </tr>

@@ -57,29 +57,37 @@ const PosterTable = ({ posters, setPosters, editingPoster, setEditingPoster }) =
             </tr>
           </thead>
           <tbody>
-            {posters.map((poster) => (
-              <tr key={poster.id} className="border-t border-gray-700">
-                <td className="px-12 py-4">
-                  <img src={poster.posterImage} alt={poster.posterName} className="w-20 h-20 object-cover rounded" />
-                </td>
-                <td className="px-12 py-4">{poster.posterName}</td>
-                <td className="px-12 py-4">{poster.date}</td>
-                <td className="px-40 py-4">
-                  <AddPosterDialog onAddPoster={handleAddPoster} onEditPoster={handleEditPoster} initialData={poster}>
-                    <AlertDialogTrigger asChild>
-                      <button onClick={() => setEditingPoster(poster)} className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white">
-                        <Edit className="h-4 w-4" />
-                      </button>
-                    </AlertDialogTrigger>
-                  </AddPosterDialog>
-                </td>
-                <td className="px-6 py-4">
-                  <button onClick={() => handleDeletePoster(poster.id)} className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white">
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+            {posters.length === 0 ? (
+              <tr className="border-t border-gray-700">
+                <td colSpan="5" className="px-12 py-4 text-center text-gray-400">
+                  No Poster found.
                 </td>
               </tr>
-            ))}
+            ) : (
+              posters.map((poster) => (
+                <tr key={poster.id} className="border-t border-gray-700">
+                  <td className="px-12 py-4">
+                    <img src={poster.posterImage} alt={poster.posterName} className="w-20 h-20 object-cover rounded" />
+                  </td>
+                  <td className="px-12 py-4">{poster.posterName}</td>
+                  <td className="px-12 py-4">{poster.date}</td>
+                  <td className="px-40 py-4">
+                    <AddPosterDialog onAddPoster={handleAddPoster} onEditPoster={handleEditPoster} initialData={poster}>
+                      <AlertDialogTrigger asChild>
+                        <button onClick={() => setEditingPoster(poster)} className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white">
+                          <Edit className="h-4 w-4" />
+                        </button>
+                      </AlertDialogTrigger>
+                    </AddPosterDialog>
+                  </td>
+                  <td className="px-6 py-4">
+                    <button onClick={() => handleDeletePoster(poster.id)} className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
