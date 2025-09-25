@@ -1,16 +1,36 @@
 "use client";
 
-import { FileText, Clock, CheckCircle, XCircle, Truck, PackageCheck } from "lucide-react";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
+import {
+  FileText,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Truck,
+  PackageCheck,
+} from "lucide-react";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts";
 
 const OrderDetails = ({ orders = [] }) => {
+  // ✅ Ensure it's always an array
+  const safeOrders = Array.isArray(orders) ? orders : [];
+
   const orderCounts = {
-    all: orders.length,
-    pending: orders.filter(o => o.status === 'Pending').length,
-    processed: orders.filter(o => o.status === 'Processed').length,
-    cancelled: orders.filter(o => o.status === 'Cancelled').length,
-    shipped: orders.filter(o => o.status === 'Shipped').length,
-    delivered: orders.filter(o => o.status === 'Delivered').length,
+    all: safeOrders.length,
+    pending: safeOrders.filter(
+      (o) => (o.status || "").toLowerCase() === "pending"
+    ).length,
+    processed: safeOrders.filter(
+      (o) => (o.status || "").toLowerCase() === "processed"
+    ).length,
+    cancelled: safeOrders.filter(
+      (o) => (o.status || "").toLowerCase() === "cancelled"
+    ).length,
+    shipped: safeOrders.filter(
+      (o) => (o.status || "").toLowerCase() === "shipped"
+    ).length,
+    delivered: safeOrders.filter(
+      (o) => (o.status || "").toLowerCase() === "delivered"
+    ).length,
   };
 
   const orderItems = [
@@ -22,9 +42,12 @@ const OrderDetails = ({ orders = [] }) => {
     { title: "Delivered Orders", count: orderCounts.delivered, icon: PackageCheck, color: "text-green-500" },
   ];
 
-  const COLORS = ['#8884d8', '#ffc658', '#82ca9d', '#ff7300', '#00c49f', '#a29bfe'];
+  const COLORS = ["#8884d8", "#ffc658", "#82ca9d", "#ff7300", "#00c49f", "#a29bfe"];
   const totalOrders = orderItems.reduce((acc, item) => acc + item.count, 0);
-  const pieChartData = orderItems.map(item => ({ name: item.title, value: item.count }));
+  const pieChartData = orderItems.map((item) => ({
+    name: item.title,
+    value: item.count,
+  }));
 
   return (
     <aside className="w-92 h-screen bg-[#1e2235] text-white p-6 fixed right-0 top-0 flex flex-col">
@@ -44,7 +67,10 @@ const OrderDetails = ({ orders = [] }) => {
                 label
               >
                 {pieChartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
                 ))}
               </Pie>
               <Legend />
@@ -56,7 +82,7 @@ const OrderDetails = ({ orders = [] }) => {
           )}
         </ResponsiveContainer>
       </div>
-      <div className="flex-1 space-y-4 mt-4">
+      <div className="flex-1 space-y-4 mt-4 overflow-y-auto">
         {orderItems.map((item) => (
           <div
             key={item.title}

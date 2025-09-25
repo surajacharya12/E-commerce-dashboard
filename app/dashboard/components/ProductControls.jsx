@@ -1,33 +1,40 @@
-"use client"
+"use client";
 
-import { AlertDialogTrigger } from "@/components/ui/alert-dialog"
-import { FileText, RefreshCw, Plus, PackageX, PackageMinus, PackageCheck } from "lucide-react"
-import AddProductDialog from "./AddProductDialog"
-import { storeApi } from "@/lib/utils"
+import { AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { FileText, RefreshCw, Plus, PackageX, PackageMinus, PackageCheck } from "lucide-react";
+import AddProductDialog from "./AddProductDialog";
 
-const ProductControls = ({ productCounts, onRefresh, onAddProduct, onEditProduct, editingProduct, setEditingProduct }) => {
-  const data = storeApi.getAll();
-
+const ProductControls = ({
+  productCounts,
+  onRefresh,
+  onAddProduct,
+  onEditProduct,
+  editingProduct,
+  setEditingProduct,
+  categories,
+  subcategories,
+  brands,
+  variantTypes,
+  variants,
+}) => {
   return (
     <div className="mb-10">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-gray-300">My Products</h2>
         <div className="flex items-center gap-8">
-          {/* Refresh button */}
           <button onClick={onRefresh} className="p-2 rounded-lg bg-[#2a2f45] hover:bg-[#353b52] border border-gray-700">
             <RefreshCw className="h-5 w-5 text-gray-300" />
           </button>
-          
-          {/* Add Product Dialog with "Add New" button as trigger */}
+
           <AddProductDialog
             onAddProduct={onAddProduct}
-            onEditProduct={onEditProduct}
+            onEditProduct={(id, payload) => onEditProduct(id, payload)}
             initialData={editingProduct}
-            categories={data.categories}
-            subcategories={data.subcategories}
-            brands={data.brands}
-            variantTypes={data.variantTypes}
-            variants={data.variants}
+            categories={categories}
+            subcategories={subcategories}
+            brands={brands}
+            variantTypes={variantTypes}
+            variants={variants}
             setEditingProduct={setEditingProduct}
           >
             <AlertDialogTrigger asChild>
@@ -38,7 +45,7 @@ const ProductControls = ({ productCounts, onRefresh, onAddProduct, onEditProduct
           </AddProductDialog>
         </div>
       </div>
-      
+
       {/* Stats cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-20">
         <div className="bg-[#2a2f45] p-6 rounded-xl shadow border border-gray-700">
@@ -48,7 +55,7 @@ const ProductControls = ({ productCounts, onRefresh, onAddProduct, onEditProduct
           </div>
           <p className="text-sm text-gray-400 mt-2">{productCounts.all} Products</p>
         </div>
-        
+
         <div className="bg-[#2a2f45] p-6 rounded-xl shadow border border-gray-700">
           <div className="flex items-center gap-2">
             <PackageX className="h-5 w-5 text-red-500" />
@@ -56,7 +63,7 @@ const ProductControls = ({ productCounts, onRefresh, onAddProduct, onEditProduct
           </div>
           <p className="text-sm text-gray-400 mt-2">{productCounts.outOfStock} Products</p>
         </div>
-        
+
         <div className="bg-[#2a2f45] p-6 rounded-xl shadow border border-gray-700">
           <div className="flex items-center gap-2">
             <PackageMinus className="h-5 w-5 text-yellow-500" />
@@ -64,7 +71,7 @@ const ProductControls = ({ productCounts, onRefresh, onAddProduct, onEditProduct
           </div>
           <p className="text-sm text-gray-400 mt-2">{productCounts.limitedStock} Products</p>
         </div>
-        
+
         <div className="bg-[#2a2f45] p-6 rounded-xl shadow border border-gray-700">
           <div className="flex items-center gap-2">
             <PackageCheck className="h-5 w-5 text-green-500" />
@@ -74,7 +81,7 @@ const ProductControls = ({ productCounts, onRefresh, onAddProduct, onEditProduct
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ProductControls
+export default ProductControls;

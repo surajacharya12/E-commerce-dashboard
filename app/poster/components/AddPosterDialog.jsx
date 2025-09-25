@@ -12,9 +12,11 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { toast } from "sonner";
 
 export default function AddPosterDialog({ children, onAddPoster, onEditPoster, initialData }) {
-  const [posterImage, setPosterImage] = useState(null);
+  const [posterFile, setPosterFile] = useState(null);
+  const [posterImagePreview, setPosterImagePreview] = useState(null);
   const [posterName, setPosterName] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [errors, setErrors] = useState({});
@@ -22,20 +24,24 @@ export default function AddPosterDialog({ children, onAddPoster, onEditPoster, i
   useEffect(() => {
     if (initialData) {
       setPosterName(initialData.posterName || "");
-      setPosterImage(initialData.posterImage || null);
+      setPosterImagePreview(initialData.imageUrl || null);
+      setPosterFile(null); // Clear file input when editing
     } else {
       setPosterName("");
-      setPosterImage(null);
+      setPosterImagePreview(null);
+      setPosterFile(null);
     }
     setErrors({});
   }, [initialData, isOpen]);
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
-      setPosterImage(URL.createObjectURL(e.target.files[0]));
-      if (errors.posterImage) {
-        setErrors((prevErrors) => ({ ...prevErrors, posterImage: "" }));
-      }
+      const file = e.target.files[0];
+      setPosterFile(file);
+      setPosterImagePreview(URL.createObjectURL(file));
+    }
+    if (errors.posterImage) {
+      setErrors((prevErrors) => ({ ...prevErrors, posterImage: "" }));
     }
   };
 
@@ -44,31 +50,38 @@ export default function AddPosterDialog({ children, onAddPoster, onEditPoster, i
     if (!posterName.trim()) {
       newErrors.posterName = "Poster name is required.";
     }
-    if (!posterImage && !initialData?.posterImage) {
+    if (!posterFile && !initialData?.imageUrl) {
       newErrors.posterImage = "A poster image is required.";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
       return;
     }
 
     const posterData = {
-      id: initialData?.id || Date.now(),
       posterName,
-      posterImage,
-      date: new Date().toLocaleDateString(),
+      posterFile,
     };
+    
+    let response;
     if (initialData) {
-      onEditPoster(posterData);
+      posterData._id = initialData._id;
+      response = await onEditPoster(posterData);
     } else {
-      onAddPoster(posterData);
+      response = await onAddPoster(posterData);
     }
-    setIsOpen(false);
+
+    if (response.success) {
+      toast.success(response.message);
+      setIsOpen(false);
+    } else {
+      toast.error(response.message);
+    }
   };
 
   return (
@@ -85,8 +98,8 @@ export default function AddPosterDialog({ children, onAddPoster, onEditPoster, i
           {/* Image Upload Area */}
           <div className={`flex flex-col items-center justify-center border rounded-lg p-12 bg-muted/20 cursor-pointer hover:bg-muted relative ${errors.posterImage ? "border-red-500" : ""}`}>
             <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer">
-              {posterImage ? (
-                <img src={posterImage} alt="Poster" className="w-full h-full object-cover rounded" />
+              {posterImagePreview ? (
+                <img src={posterImagePreview} alt="Poster" className="w-full h-full object-cover rounded" />
               ) : (
                 <div className="flex flex-col items-center">
                   <svg

@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
 import { Edit, Trash2, RefreshCw, Plus } from "lucide-react";
 import AddDiscountDialog from "./AddDiscountDialog";
 import { AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { MdShoppingCart, MdCategory, MdInventory, MdStore, MdLocalMall, MdShoppingBag, MdStorefront, MdBusiness, MdLocalOffer, MdDiscount, MdPercent, MdSell, MdPriceChange, MdMonetizationOn, MdAttachMoney, MdSavings, MdFlashOn, MdStar, MdFavorite, MdThumbUp, MdCelebration, MdCardGiftcard, MdRedeem, MdLoyalty, MdHelpOutline } from "react-icons/md";
+import { toast } from "sonner";
 
 const iconMap = {
   'shopping_cart': MdShoppingCart, 'category': MdCategory, 'inventory': MdInventory,
@@ -23,23 +23,19 @@ const renderIcon = (iconName) => {
   return <IconComponent className="h-4 w-4 mr-2" />;
 };
 
-const DiscountTable = ({ discounts, setDiscounts, editingDiscount, setEditingDiscount }) => {
-  const handleAddDiscount = (newDiscount) => {
-    setDiscounts([...discounts, newDiscount]);
-    setEditingDiscount(null);
+const DiscountTable = ({ discounts, onAddDiscount, onEditDiscount, onDeleteDiscount, onRefresh, editingDiscount, setEditingDiscount }) => {
+
+  const handleDelete = async (discountId) => {
+    const response = await onDeleteDiscount(discountId);
+    if (response.success) {
+      toast.success(response.message);
+    } else {
+      toast.error(response.message);
+    }
   };
 
-  const handleEditDiscount = (updatedDiscount) => {
-    setDiscounts(discounts.map(discount => discount.id === updatedDiscount.id ? updatedDiscount : discount));
-    setEditingDiscount(null);
-  };
-
-  const handleDeleteDiscount = (discountId) => {
-    setDiscounts(discounts.filter(discount => discount.id !== discountId));
-  };
-
-  const handleRefresh = () => {
-    setDiscounts([]);
+  const handleEdit = (discount) => {
+    setEditingDiscount(discount);
   };
 
   return (
@@ -47,10 +43,10 @@ const DiscountTable = ({ discounts, setDiscounts, editingDiscount, setEditingDis
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-xl font-semibold text-gray-300">My Discount</h2>
         <div className="flex items-center gap-8">
-          <button onClick={handleRefresh} className="p-2 rounded-lg bg-[#2a2f45] hover:bg-[#353b52] border border-gray-700">
+          <button onClick={onRefresh} className="p-2 rounded-lg bg-[#2a2f45] hover:bg-[#353b52] border border-gray-700">
             <RefreshCw className="h-5 w-5 text-gray-300" />
           </button>
-          <AddDiscountDialog onAddDiscount={handleAddDiscount} onEditDiscount={handleEditDiscount} initialData={editingDiscount}>
+          <AddDiscountDialog onAddDiscount={onAddDiscount} onEditDiscount={onEditDiscount} initialData={editingDiscount}>
             <AlertDialogTrigger asChild>
               <button onClick={() => setEditingDiscount(null)} className="flex items-center gap-5 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-medium shadow">
                 <Plus className="h-5 w-5" /> Add New
@@ -80,7 +76,7 @@ const DiscountTable = ({ discounts, setDiscounts, editingDiscount, setEditingDis
               </tr>
             ) : (
               discounts.map((discount) => (
-                <tr key={discount.id} className="border-t border-gray-700">
+                <tr key={discount._id} className="border-t border-gray-700">
                   <td className="px-12 py-4">{discount.discountName}</td>
                   <td className="px-12 py-4">
                     {discount.discountPhoto && (
@@ -90,16 +86,16 @@ const DiscountTable = ({ discounts, setDiscounts, editingDiscount, setEditingDis
                   <td className="px-12 py-4">{discount.discountPercentage}%</td>
                   <td className="px-12 py-4">{discount.date}</td>
                   <td className="px-40 py-4">
-                    <AddDiscountDialog onAddDiscount={handleAddDiscount} onEditDiscount={handleEditDiscount} initialData={discount}>
+                    <AddDiscountDialog onAddDiscount={onAddDiscount} onEditDiscount={onEditDiscount} initialData={discount}>
                       <AlertDialogTrigger asChild>
-                        <button onClick={() => setEditingDiscount(discount)} className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white">
+                        <button onClick={() => handleEdit(discount)} className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white">
                           <Edit className="h-4 w-4" />
                         </button>
                       </AlertDialogTrigger>
                     </AddDiscountDialog>
                   </td>
                   <td className="px-6 py-4">
-                    <button onClick={() => handleDeleteDiscount(discount.id)} className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white">
+                    <button onClick={() => handleDelete(discount._id)} className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white">
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </td>

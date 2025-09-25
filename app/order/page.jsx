@@ -1,69 +1,66 @@
-"use client"
+"use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import TopBar from "./components/TopBar";
 import OrderTable from "./components/OrderTable";
-
-const mockOrders = [
-  {
-    id: 1,
-    customerName: "John Doe",
-    orderAmount: 150.00,
-    payment: "Paid",
-    status: "Processing",
-    date: "2025-09-24",
-  },
-  {
-    id: 2,
-    customerName: "Jane Smith",
-    orderAmount: 75.50,
-    payment: "Pending",
-    status: "Shipped",
-    date: "2025-09-23",
-  },
-  {
-    id: 3,
-    customerName: "Robert Brown",
-    orderAmount: 300.25,
-    payment: "Paid",
-    status: "Delivered",
-    date: "2025-09-22",
-  },
-  {
-    id: 4,
-    customerName: "Emily White",
-    orderAmount: 25.00,
-    payment: "Cancelled",
-    status: "Cancelled",
-    date: "2025-09-21",
-  },
-];
+import url from "../http/page"; // import backend url
 
 export default function Order() {
-  const [orders, setOrders] = useState(mockOrders);
+  const [orders, setOrders] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("Status");
 
+  // Fetch orders from backend
+  const fetchOrders = async () => {
+    try {
+      const res = await fetch(`${url}orders`);
+      const data = await res.json();
+      console.log("API Response:", data); // 👀 see what backend returns
+
+      // ✅ Normalize: always set an array
+      if (Array.isArray(data)) {
+        setOrders(data);
+      } else if (Array.isArray(data.orders)) {
+        setOrders(data.orders);
+      } else {
+        setOrders([]); // fallback
+      }
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      setOrders([]); // fallback on error
+    }
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
   const handleRefresh = () => {
-    // In a real application, you would fetch fresh data from an API here
-    setOrders(mockOrders);
+    fetchOrders();
     setSearchTerm("");
     setStatusFilter("Status");
   };
-  
-  const handleDelete = (id) => {
-    setOrders(orders.filter(order => order.id !== id));
+
+  const handleDelete = async (id) => {
+    try {
+      await fetch(`${url}orders/${id}`, { method: "DELETE" });
+      setOrders((prev) => prev.filter((order) => order.id !== id));
+    } catch (error) {
+      console.error("Error deleting order:", error);
+    }
   };
 
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.customerName.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "Status" || order.status === statusFilter;
+  const filteredOrders = orders.filter((order) => {
+    const matchesSearch = order.customerName
+      ?.toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      statusFilter === "Status" || order.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   return (
     <div className="flex min-h-screen bg-[#111827] text-white">
-      {/* Main content */}
       <main className="flex-1 flex flex-col md:p-10 gap-10 overflow-y-auto">
         <TopBar
           orderCount={filteredOrders.length}

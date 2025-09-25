@@ -1,13 +1,12 @@
-"use client"
+"use client";
 
 import { Search } from "lucide-react";
 
-const TopBar = ({ pageTitle, searchTerm, setSearchTerm, filters, setFilters }) => {
+const TopBar = ({ pageTitle = "Dashboard", searchTerm, setSearchTerm, filters, setFilters }) => {
   return (
     <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
       <h1 className="text-3xl font-bold text-white">{pageTitle}</h1>
       <div className="flex flex-wrap items-center gap-8">
-        {/* Search */}
         <div className="relative">
           <input
             type="text"
@@ -18,18 +17,18 @@ const TopBar = ({ pageTitle, searchTerm, setSearchTerm, filters, setFilters }) =
           />
           <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
         </div>
-        {/* Filter: Status */}
         <select
           value={filters.status}
           onChange={(e) => setFilters({ ...filters, status: e.target.value })}
           className="border border-gray-700 bg-[#2a2f45] text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="">Status</option>
-          <option>Completed</option>
-          <option>Pending</option>
-          <option>Cancelled</option>
+          <option>Status</option>
+            <option>Processing</option>
+            <option>Shipped</option>
+            <option>Pending</option>
+            <option>Delivered</option>
+            <option>Cancelled</option>
         </select>
-        {/* Filter: Date */}
         <select
           value={filters.date}
           onChange={(e) => setFilters({ ...filters, date: e.target.value })}

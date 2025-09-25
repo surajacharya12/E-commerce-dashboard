@@ -1,43 +1,57 @@
 "use client"
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TopBar from "./components/TopBar";
 import VariantTable from "./components/VariantTable";
-import { storeApi } from "@/lib/utils";
+import url from '../http/page'; // Assuming url.js is in the same folder
+import { usePathname } from 'next/navigation';
 
 export default function Variant() {
   const [variants, setVariants] = useState([]);
-  const [variantTypes, setVariantTypes] = useState(storeApi.getAll().variantTypes);
+  const [variantTypes, setVariantTypes] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingVariant, setEditingVariant] = useState(null);
+  const pathname = usePathname();
 
-  const handleAddVariant = (newVariant) => {
-    setVariants([...variants, { ...newVariant, id: Date.now(), date: new Date().toISOString().split('T')[0] }]);
-    setEditingVariant(null);
+  const fetchVariants = async () => {
+    try {
+      const response = await fetch(`${url}variants`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch variants.");
+      }
+      const data = await response.json();
+      setVariants(data.data);
+    } catch (error) {
+      console.error("Error fetching variants:", error);
+    }
   };
 
-  const handleEditVariant = (updatedVariant) => {
-    setVariants(variants.map(variant => variant.id === updatedVariant.id ? updatedVariant : variant));
-    setEditingVariant(null);
+  const fetchVariantTypes = async () => {
+    try {
+      const response = await fetch(`${url}variantTypes`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch variant types.");
+      }
+      const data = await response.json();
+      setVariantTypes(data.data);
+    } catch (error) {
+      console.error("Error fetching variant types:", error);
+    }
   };
 
-  const handleDeleteVariant = (id) => {
-    setVariants(variants.filter(variant => variant.id !== id));
-  };
-  
-  const handleRefresh = () => {
-    setVariants([]);
-    setEditingVariant(null);
-  };
+  useEffect(() => {
+    fetchVariants();
+    fetchVariantTypes();
+  }, [pathname]);
 
-  const filteredVariants = variants.filter(variant =>
-    variant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    variantTypes.find(vt => vt.id === variant.type)?.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredVariants = variants.filter(variant => {
+    const variantTypeName = variant.variantTypeId?.name?.toLowerCase() || '';
+    return variant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           variantTypeName.includes(searchTerm.toLowerCase());
+  });
 
   return (
     <div className="flex min-h-screen bg-[#111827] text-white">
-      {/* Main content */}
       <main className="flex-1 flex flex-col md:p-10 gap-10 overflow-y-auto">
         <TopBar
           pageTitle="Variant"
@@ -48,10 +62,7 @@ export default function Variant() {
         <VariantTable
           variants={filteredVariants}
           variantTypes={variantTypes}
-          onAddVariant={handleAddVariant}
-          onEditVariant={handleEditVariant}
-          onDeleteVariant={handleDeleteVariant}
-          handleRefresh={handleRefresh}
+          fetchVariants={fetchVariants}
           editingVariant={editingVariant}
           setEditingVariant={setEditingVariant}
         />

@@ -14,15 +14,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select"
 
-export default function AddVariantDialog({ children, onAddVariant, onEditVariant, initialData, variantTypes }) {
-  const [variantType, setVariantType] = useState("")
-  const [variantName, setVariantName] = useState("")
+export default function AddVariantDialog({ children, onAddVariant, onEditVariant, initialData, variantTypes, fetchVariants }) {
+  const [variantType, setVariantType] = useState("");
+  const [variantName, setVariantName] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (initialData) {
-      setVariantType(initialData.type || "");
+      setVariantType(initialData.variantTypeId?._id || "");
       setVariantName(initialData.name || "");
     } else {
       setVariantType("");
@@ -49,17 +49,15 @@ export default function AddVariantDialog({ children, onAddVariant, onEditVariant
       return;
     }
 
-    const newVariant = {
-      id: initialData?.id || Date.now(),
-      type: variantType,
+    const data = {
+      variantTypeId: variantType,
       name: variantName,
-      date: initialData?.date || new Date().toISOString().split('T')[0],
     };
 
     if (initialData) {
-      onEditVariant(newVariant);
+      onEditVariant(initialData._id, data);
     } else {
-      onAddVariant(newVariant);
+      onAddVariant(data);
     }
     
     setIsOpen(false);
@@ -87,7 +85,7 @@ export default function AddVariantDialog({ children, onAddVariant, onEditVariant
                     <SelectItem value="__no_variant_types__" disabled>No variant types found</SelectItem>
                   ) : (
                     variantTypes.map((vt) => (
-                      <SelectItem key={vt.id} value={vt.id}>{vt.name}</SelectItem>
+                      <SelectItem key={vt._id} value={vt._id}>{vt.name}</SelectItem>
                     ))
                   )}
                 </SelectContent>
@@ -119,5 +117,5 @@ export default function AddVariantDialog({ children, onAddVariant, onEditVariant
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
+  );
 }

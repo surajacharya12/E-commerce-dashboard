@@ -3,26 +3,21 @@
 import { Edit, Trash2, RefreshCw, Plus } from "lucide-react";
 import AddPosterDialog from "./AddPosterDialog";
 import { AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
-const PosterTable = ({ posters, setPosters, editingPoster, setEditingPoster }) => {
+const PosterTable = ({ posters, onAddPoster, onEditPoster, onDeletePoster, onRefresh, editingPoster, setEditingPoster }) => {
 
-  const handleAddPoster = (newPoster) => {
-    setPosters([...posters, newPoster]);
-    setEditingPoster(null);
+  const handleDelete = async (posterId) => {
+    const response = await onDeletePoster(posterId);
+    if (response.success) {
+      toast.success(response.message);
+    } else {
+      toast.error(response.message);
+    }
   };
 
-  const handleEditPoster = (updatedPoster) => {
-    setPosters(posters.map(poster => poster.id === updatedPoster.id ? updatedPoster : poster));
-    setEditingPoster(null);
-  };
-
-  const handleDeletePoster = (posterId) => {
-    setPosters(posters.filter(poster => poster.id !== posterId));
-  };
-
-  const handleRefresh = () => {
-    // This will clear all posters, you might want to refetch them from an API instead
-    setPosters([]);
+  const handleEdit = (poster) => {
+    setEditingPoster(poster);
   };
 
   return (
@@ -31,10 +26,10 @@ const PosterTable = ({ posters, setPosters, editingPoster, setEditingPoster }) =
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-xl font-semibold text-gray-300">My Posters</h2>
         <div className="flex items-center gap-8">
-          <button onClick={handleRefresh} className="p-2 rounded-lg bg-[#2a2f45] hover:bg-[#353b52] border border-gray-700">
+          <button onClick={onRefresh} className="p-2 rounded-lg bg-[#2a2f45] hover:bg-[#353b52] border border-gray-700">
             <RefreshCw className="h-5 w-5 text-gray-300" />
           </button>
-          <AddPosterDialog onAddPoster={handleAddPoster} onEditPoster={handleEditPoster} initialData={editingPoster}>
+          <AddPosterDialog onAddPoster={onAddPoster} onEditPoster={onEditPoster} initialData={editingPoster}>
             <AlertDialogTrigger asChild>
               <button onClick={() => setEditingPoster(null)} className="flex items-center gap-5 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-medium shadow">
                 <Plus className="h-5 w-5" /> Add New
@@ -65,23 +60,25 @@ const PosterTable = ({ posters, setPosters, editingPoster, setEditingPoster }) =
               </tr>
             ) : (
               posters.map((poster) => (
-                <tr key={poster.id} className="border-t border-gray-700">
+                <tr key={poster._id} className="border-t border-gray-700">
                   <td className="px-12 py-4">
-                    <img src={poster.posterImage} alt={poster.posterName} className="w-20 h-20 object-cover rounded" />
+                    {poster.imageUrl && (
+                      <img src={poster.imageUrl} alt={poster.posterName} className="w-20 h-20 object-cover rounded" />
+                    )}
                   </td>
                   <td className="px-12 py-4">{poster.posterName}</td>
-                  <td className="px-12 py-4">{poster.date}</td>
+                  <td className="px-12 py-4">{new Date(poster.createdAt).toLocaleDateString()}</td>
                   <td className="px-40 py-4">
-                    <AddPosterDialog onAddPoster={handleAddPoster} onEditPoster={handleEditPoster} initialData={poster}>
+                    <AddPosterDialog onAddPoster={onAddPoster} onEditPoster={onEditPoster} initialData={poster}>
                       <AlertDialogTrigger asChild>
-                        <button onClick={() => setEditingPoster(poster)} className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white">
+                        <button onClick={() => handleEdit(poster)} className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white">
                           <Edit className="h-4 w-4" />
                         </button>
                       </AlertDialogTrigger>
                     </AddPosterDialog>
                   </td>
                   <td className="px-6 py-4">
-                    <button onClick={() => handleDeletePoster(poster.id)} className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white">
+                    <button onClick={() => handleDelete(poster._id)} className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white">
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </td>

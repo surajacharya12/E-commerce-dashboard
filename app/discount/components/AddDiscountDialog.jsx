@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,14 +9,21 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select"
-import { MdShoppingCart, MdCategory, MdInventory, MdStore, MdLocalMall, MdShoppingBag, MdStorefront, MdBusiness, MdLocalOffer, MdDiscount, MdPercent, MdSell, MdPriceChange, MdMonetizationOn, MdAttachMoney, MdSavings, MdFlashOn, MdStar, MdFavorite, MdThumbUp, MdCelebration, MdCardGiftcard, MdRedeem, MdLoyalty, MdHelpOutline } from "react-icons/md";
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import {
+  MdShoppingCart, MdCategory, MdInventory, MdStore, MdLocalMall,
+  MdShoppingBag, MdStorefront, MdBusiness, MdLocalOffer, MdDiscount,
+  MdPercent, MdSell, MdPriceChange, MdMonetizationOn, MdAttachMoney,
+  MdSavings, MdFlashOn, MdStar, MdFavorite, MdThumbUp, MdCelebration,
+  MdCardGiftcard, MdRedeem, MdLoyalty, MdHelpOutline
+} from "react-icons/md";
+import { toast } from "sonner";
 
-// Icon mapping to connect string names to React components
+// Map of icons
 const iconMap = {
   'shopping_cart': MdShoppingCart, 'category': MdCategory, 'inventory': MdInventory,
   'store': MdStore, 'local_mall': MdLocalMall, 'shopping_bag': MdShoppingBag,
@@ -38,7 +45,8 @@ export default function AddDiscountDialog({ children, onAddDiscount, onEditDisco
   const [description, setDescription] = useState("");
   const [discountName, setDiscountName] = useState("");
   const [categoryIcon, setCategoryIcon] = useState("");
-  const [discountPhoto, setDiscountPhoto] = useState(null);
+  const [discountPhoto, setDiscountPhoto] = useState(null); // This will hold the File object
+  const [discountPhotoPreview, setDiscountPhotoPreview] = useState(null); // This will hold the URL for preview
   const [discountIcon, setDiscountIcon] = useState("");
   const [dealIcon, setDealIcon] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -46,19 +54,22 @@ export default function AddDiscountDialog({ children, onAddDiscount, onEditDisco
 
   useEffect(() => {
     if (initialData) {
-      setDiscountPercentage(initialData.discountPercentage || "");
+      // Convert number to string for input value consistency
+      setDiscountPercentage(String(initialData.discountPercentage) || "");
       setDescription(initialData.description || "");
       setDiscountName(initialData.discountName || "");
       setCategoryIcon(initialData.categoryIcon || "");
-      setDiscountPhoto(initialData.discountPhoto || null);
       setDiscountIcon(initialData.discountIcon || "");
       setDealIcon(initialData.dealIcon || "");
+      setDiscountPhoto(null); // Clear file input when editing
+      setDiscountPhotoPreview(initialData.discountPhoto || null); // Set initial photo URL for preview
     } else {
       setDiscountPercentage("");
       setDescription("");
       setDiscountName("");
       setCategoryIcon("");
       setDiscountPhoto(null);
+      setDiscountPhotoPreview(null);
       setDiscountIcon("");
       setDealIcon("");
     }
@@ -67,7 +78,9 @@ export default function AddDiscountDialog({ children, onAddDiscount, onEditDisco
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
-      setDiscountPhoto(URL.createObjectURL(e.target.files[0]));
+      const file = e.target.files[0];
+      setDiscountPhoto(file);
+      setDiscountPhotoPreview(URL.createObjectURL(file));
     }
     if (errors.discountPhoto) {
       setErrors((prevErrors) => ({ ...prevErrors, discountPhoto: "" }));
@@ -76,48 +89,61 @@ export default function AddDiscountDialog({ children, onAddDiscount, onEditDisco
 
   const validateForm = () => {
     const newErrors = {};
-
     if (!discountName.trim()) {
       newErrors.discountName = "Discount Name is required.";
     }
-    if (!discountPercentage.trim() || isNaN(parseFloat(discountPercentage)) || parseFloat(discountPercentage) < 0 || parseFloat(discountPercentage) > 100) {
+    
+    // Convert to string before calling trim()
+    if (!String(discountPercentage).trim() || isNaN(parseFloat(discountPercentage)) || parseFloat(discountPercentage) < 0 || parseFloat(discountPercentage) > 100) {
       newErrors.discountPercentage = "Please enter a valid number between 0 and 100.";
     }
+    
     if (!categoryIcon) {
       newErrors.categoryIcon = "Please select a Category Icon.";
     }
     if (!discountPhoto && !initialData?.discountPhoto) {
       newErrors.discountPhoto = "A discount photo is required.";
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     const discountData = {
-      id: initialData?.id || Date.now(),
-      discountPercentage,
-      description,
       discountName,
+      description,
+      discountPercentage,
       categoryIcon,
-      discountPhoto,
       discountIcon,
       dealIcon,
       date: new Date().toLocaleDateString(),
     };
 
-    if (initialData) {
-      onEditDiscount(discountData);
-    } else {
-      onAddDiscount(discountData);
+    if (discountPhoto) {
+      discountData.discountPhoto = discountPhoto;
     }
-    setIsOpen(false);
+
+    if (initialData) {
+      discountData._id = initialData._id;
+      const response = await onEditDiscount(discountData);
+      if (response.success) {
+        toast.success(response.message);
+        setIsOpen(false);
+      } else {
+        toast.error(response.message);
+      }
+    } else {
+      const response = await onAddDiscount(discountData);
+      if (response.success) {
+        toast.success(response.message);
+        setIsOpen(false);
+      } else {
+        toast.error(response.message);
+      }
+    }
   };
 
   const renderIcon = (iconName) => {
@@ -135,7 +161,7 @@ export default function AddDiscountDialog({ children, onAddDiscount, onEditDisco
           </AlertDialogTitle>
         </AlertDialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Input
                 placeholder="Discount Percentage (%)"
@@ -146,13 +172,6 @@ export default function AddDiscountDialog({ children, onAddDiscount, onEditDisco
               />
               {errors.discountPercentage && <p className="text-red-500 text-sm mt-1">{errors.discountPercentage}</p>}
             </div>
-            <Textarea
-              placeholder="Description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
             <div>
               <Input
                 placeholder="Discount Name"
@@ -162,6 +181,13 @@ export default function AddDiscountDialog({ children, onAddDiscount, onEditDisco
               />
               {errors.discountName && <p className="text-red-500 text-sm mt-1">{errors.discountName}</p>}
             </div>
+          </div>
+          <Textarea
+            placeholder="Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Select onValueChange={setCategoryIcon} value={categoryIcon}>
                 <SelectTrigger className={errors.categoryIcon ? "border-red-500" : ""}>
@@ -180,41 +206,6 @@ export default function AddDiscountDialog({ children, onAddDiscount, onEditDisco
               </Select>
               {errors.categoryIcon && <p className="text-red-500 text-sm mt-1">{errors.categoryIcon}</p>}
             </div>
-          </div>
-          <div className="flex flex-col items-center justify-center border rounded-lg p-6 bg-muted/20 cursor-pointer hover:bg-muted relative">
-            <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer">
-              {discountPhoto ? (
-                <img src={discountPhoto} alt="Discount" className="w-full h-full object-cover rounded" />
-              ) : (
-                <div className="flex flex-col items-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-10 w-10 text-gray-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 13V9a1 1 0 011-1h4a1 1 0 011 1v4m-2 4h-2m-2-2h4"
-                    />
-                  </svg>
-                  <span className="mt-2 text-sm text-gray-500">Discount Photo</span>
-                </div>
-              )}
-              <Input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-            </label>
-            {errors.discountPhoto && <p className="text-red-500 text-sm mt-1">{errors.discountPhoto}</p>}
-          </div>
-          <div className="grid grid-cols-2 gap-4">
             <Select onValueChange={setDiscountIcon} value={discountIcon}>
               <SelectTrigger>
                 <SelectValue placeholder="Discount Icon" />
@@ -245,6 +236,23 @@ export default function AddDiscountDialog({ children, onAddDiscount, onEditDisco
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div className="flex flex-col items-center justify-center border rounded-lg p-6 bg-muted/20 cursor-pointer hover:bg-muted relative">
+            <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer">
+              {discountPhotoPreview ? (
+                <img src={discountPhotoPreview} alt="Discount" className="w-full h-full object-cover rounded" />
+              ) : (
+                <div className="flex flex-col items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13V9a1 1 0 011-1h4a1 1 0 011 1v4m-2 4h-2m-2-2h4" />
+                  </svg>
+                  <span className="mt-2 text-sm text-gray-500">Discount Photo</span>
+                </div>
+              )}
+              <Input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+            </label>
+            {errors.discountPhoto && <p className="text-red-500 text-sm mt-1">{errors.discountPhoto}</p>}
           </div>
         </form>
         <AlertDialogFooter className="mt-6">

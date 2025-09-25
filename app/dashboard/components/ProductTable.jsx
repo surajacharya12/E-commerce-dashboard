@@ -1,15 +1,19 @@
-"use client"
+"use client";
 
 import { Edit, Trash2 } from "lucide-react";
 import AddProductDialog from "./AddProductDialog";
 import { AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { storeApi } from "@/lib/utils";
 
-const ProductsTable = ({ products, onDeleteProduct, onSetEditingProduct }) => {
-  const data = storeApi.getAll();
-
-  const getCategoryName = (categoryId) => data.categories.find(c => c.id === categoryId)?.name;
-  const getSubCategoryName = (subcategoryId) => data.subcategories.find(sc => sc.id === subcategoryId)?.name;
+const ProductsTable = ({
+  products = [],
+  onDeleteProduct,
+  onEditProduct,
+  onSetEditingProduct,
+  categories = [],
+  subcategories = [],
+}) => {
+  const getCategoryName = (categoryId) => categories.find((c) => (c.id || c._id) === categoryId)?.name;
+  const getSubCategoryName = (subcategoryId) => subcategories.find((s) => (s.id || s._id) === subcategoryId)?.name;
 
   return (
     <div className="bg-[#2a2f45] rounded-xl shadow overflow-hidden border border-gray-700">
@@ -32,22 +36,19 @@ const ProductsTable = ({ products, onDeleteProduct, onSetEditingProduct }) => {
               </td>
             </tr>
           ) : (
-            products.map(product => (
-              <tr key={product.id} className="border-t border-gray-700">
+            products.map((product) => (
+              <tr key={product.id || product._id} className="border-t border-gray-700">
                 <td className="px-6 py-4">{product.name}</td>
                 <td className="px-6 py-4">{getCategoryName(product.categoryId)}</td>
                 <td className="px-6 py-4">{getSubCategoryName(product.subcategoryId)}</td>
                 <td className="px-6 py-4 text-white">${product.price}</td>
                 <td className="px-6 py-4">
                   <AddProductDialog
-                    onAddProduct={() => {}} // No-op for editing dialog
-                    onEditProduct={onSetEditingProduct}
+                    onAddProduct={() => {}}
+                    onEditProduct={(id, payload) => onEditProduct(id, payload)}
                     initialData={product}
-                    categories={data.categories}
-                    subcategories={data.subcategories}
-                    brands={data.brands}
-                    variantTypes={data.variantTypes}
-                    variants={data.variants}
+                    categories={categories}
+                    subcategories={subcategories}
                     setEditingProduct={onSetEditingProduct}
                   >
                     <AlertDialogTrigger asChild>
@@ -58,7 +59,7 @@ const ProductsTable = ({ products, onDeleteProduct, onSetEditingProduct }) => {
                   </AddProductDialog>
                 </td>
                 <td className="px-6 py-4">
-                  <button onClick={() => onDeleteProduct(product.id)} className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white">
+                  <button onClick={() => onDeleteProduct(product.id || product._id)} className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white">
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </td>

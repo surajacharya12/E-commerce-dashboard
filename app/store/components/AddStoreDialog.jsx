@@ -72,7 +72,6 @@ export default function AddStoreDialog({ children, onAddStore, onEditStore, init
       setStoreManagerPhoto(initialData.storeManagerPhoto || null)
       setGradientColor(initialData.gradientColor || "")
     } else {
-      // Reset form when adding a new store
       setStoreName("")
       setStoreManagerName("")
       setStoreEmail("")
@@ -83,7 +82,7 @@ export default function AddStoreDialog({ children, onAddStore, onEditStore, init
       setStoreManagerPhoto(null)
       setGradientColor("")
     }
-    setErrors({}); // Reset errors when dialog opens
+    setErrors({});
   }, [initialData])
 
   const handleImageChange = (e) => {
@@ -92,11 +91,10 @@ export default function AddStoreDialog({ children, onAddStore, onEditStore, init
     }
   }
 
-  // Validation function
   const validateForm = () => {
     const newErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^\d{10}$/; // Exactly 10 digits
+    const phoneRegex = /^\d{10}$/;
 
     if (!storeName.trim()) {
       newErrors.storeName = "Store name is required.";
