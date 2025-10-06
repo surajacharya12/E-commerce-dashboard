@@ -23,25 +23,30 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [prodRes, orderRes, catRes, subRes, brandRes, vtypeRes, varRes] =
-          await Promise.all([
-            fetch(`${url}products`).then((r) => r.json()),
-            fetch(`${url}orders`).then((r) => r.json()),
-            fetch(`${url}categories`).then((r) => r.json()),
-            fetch(`${url}subCategories`).then((r) => r.json()),
-            fetch(`${url}brands`).then((r) => r.json()),
-            fetch(`${url}variantTypes`).then((r) => r.json()),
-            fetch(`${url}variants`).then((r) => r.json()),
-          ]);
+        const [
+          prodRes,
+          orderRes,
+          catRes,
+          subRes,
+          brandRes,
+          vtypeRes,
+          varRes,
+        ] = await Promise.all([
+          fetch(`${url}products`).then((r) => r.json()),
+          fetch(`${url}orders`).then((r) => r.json()),
+          fetch(`${url}categories`).then((r) => r.json()),
+          fetch(`${url}subCategories`).then((r) => r.json()),
+          fetch(`${url}brands`).then((r) => r.json()),
+          fetch(`${url}variantTypes`).then((r) => r.json()),
+          fetch(`${url}variants`).then((r) => r.json()),
+        ]);
 
         setProducts(Array.isArray(prodRes?.data) ? prodRes.data : prodRes || []);
         setOrders(Array.isArray(orderRes?.data) ? orderRes.data : orderRes || []);
         setCategories(Array.isArray(catRes?.data) ? catRes.data : catRes || []);
         setSubcategories(Array.isArray(subRes?.data) ? subRes.data : subRes || []);
         setBrands(Array.isArray(brandRes?.data) ? brandRes.data : brandRes || []);
-        setVariantTypes(
-          Array.isArray(vtypeRes?.data) ? vtypeRes.data : vtypeRes || []
-        );
+        setVariantTypes(Array.isArray(vtypeRes?.data) ? vtypeRes.data : vtypeRes || []);
         setVariants(Array.isArray(varRes?.data) ? varRes.data : varRes || []);
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -52,35 +57,56 @@ export default function Dashboard() {
   }, []);
 
   // ✅ Add product
-  const handleAddProduct = async (newProduct) => {
+  const handleAddProduct = async (payload) => {
     try {
       const res = await fetch(`${url}products`, {
         method: "POST",
-        body: JSON.stringify(newProduct),
-        headers: { "Content-Type": "application/json" },
+        body: payload, // Pass FormData directly
       });
+
       const saved = await res.json();
-      setProducts((prev) => [...prev, saved.data || saved]);
-      setEditingProduct(null);
+
+      if (res.ok) {
+        setProducts((prev) => [...prev, saved.data || saved]);
+        setEditingProduct(null);
+      } else {
+        throw new Error(saved.message || "Failed to add product");
+      }
     } catch (err) {
       console.error("Error adding product:", err);
+      throw err;
     }
   };
 
   // ✅ Edit product
-  const handleEditProduct = async (updatedProduct) => {
+  const handleEditProduct = async (id, payload) => {
     try {
-      await fetch(`${url}products/${updatedProduct.id}`, {
-        method: "PUT",
-        body: JSON.stringify(updatedProduct),
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch(`${url}products/${id}`, {
+        method: "PATCH",
+        body: payload, // Pass FormData directly
       });
-      setProducts((prev) =>
-        prev.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
-      );
-      setEditingProduct(null);
+
+      const updated = await res.json();
+
+      if (res.ok) {
+        const updatedProductData = updated.data || updated;
+
+        setProducts((prev) =>
+          prev.map((p) =>
+            p.id === (updatedProductData.id || updatedProductData._id) ||
+            p._id === (updatedProductData.id || updatedProductData._id)
+              ? updatedProductData
+              : p
+          )
+        );
+
+        setEditingProduct(null);
+      } else {
+        throw new Error(updated.message || "Failed to update product");
+      }
     } catch (err) {
       console.error("Error updating product:", err);
+      throw err;
     }
   };
 
@@ -88,7 +114,7 @@ export default function Dashboard() {
   const handleDeleteProduct = async (id) => {
     try {
       await fetch(`${url}products/${id}`, { method: "DELETE" });
-      setProducts((prev) => prev.filter((p) => p.id !== id));
+      setProducts((prev) => prev.filter((p) => (p.id || p._id) !== id));
     } catch (err) {
       console.error("Error deleting product:", err);
     }
@@ -105,6 +131,7 @@ export default function Dashboard() {
     }
   };
 
+  // ✅ Filtered products
   const filteredProducts = products.filter((p) =>
     p.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -118,14 +145,17 @@ export default function Dashboard() {
 
   return (
     <div className="flex min-h-screen bg-[#111827] text-white">
-      <main className="flex-1 flex flex-col md:p-10 gap-10 overflow-y-auto">
+      {/* Main Content Area */}
+      <main className="flex-1 p-8 pr-96">
+        {/* Increased right padding to prevent content from going under the fixed OrderDetails sidebar */}
         <TopBar
-          pageTitle="Dashboard"
+          pageTitle="Admin Dashboard"
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
           filters={filters}
           setFilters={setFilters}
         />
+
         <ProductControls
           productCounts={productCounts}
           onRefresh={handleRefreshProducts}
@@ -139,15 +169,18 @@ export default function Dashboard() {
           variantTypes={variantTypes}
           variants={variants}
         />
+
         <ProductsTable
           products={filteredProducts}
-          onEditProduct={handleEditProduct}
           onDeleteProduct={handleDeleteProduct}
+          onEditProduct={handleEditProduct}
           onSetEditingProduct={setEditingProduct}
           categories={categories}
           subcategories={subcategories}
         />
       </main>
+
+      {/* Sidebar - Order Details */}
       <OrderDetails orders={orders} />
     </div>
   );

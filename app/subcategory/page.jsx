@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from "react";
 import TopBar from "./components/TopBar";
@@ -30,36 +30,41 @@ export default function SubCategory() {
     fetchSubCategories();
   }, []);
 
-  const handleAddSubCategory = async (name, categoryId) => {
+  // Updated to accept FormData
+  const handleAddSubCategory = async (formData) => {
     try {
       const response = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, categoryId }),
+        // DO NOT set 'Content-Type': 'application/json' when sending FormData
+        body: formData, 
       });
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to add sub-category.");
       }
       fetchSubCategories();
+      // Logic to close the dialog after successful addition
+      // Note: You may need a state in parent to force close the dialog
+      // For now, we rely on a full page refresh/re-fetch.
     } catch (error) {
       console.error("Error adding sub-category:", error.message);
     }
   };
 
-  const handleEditSubCategory = async (id, name, categoryId) => {
+  // Updated to accept FormData
+  const handleEditSubCategory = async (id, formData) => {
     try {
       const response = await fetch(`${API_URL}/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, categoryId }),
+        // DO NOT set 'Content-Type': 'application/json' when sending FormData
+        body: formData,
       });
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to edit sub-category.");
       }
       fetchSubCategories();
-      setEditingSubCategory(null);
+      setEditingSubCategory(null); // Clear editing state and close dialog
     } catch (error) {
       console.error("Error editing sub-category:", error.message);
     }
@@ -112,3 +117,9 @@ export default function SubCategory() {
     </div>
   );
 }
+
+
+
+
+
+

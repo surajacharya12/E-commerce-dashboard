@@ -1,9 +1,10 @@
-"use client"
+"use client";
 
 import { Edit, Trash2, RefreshCw, Plus } from "lucide-react";
 import AddSubCategoryDialog from "./AddSubCategoryDialog";
 import { AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Layers } from "lucide-react";
+// import Image from "next/image"; // REMOVED: No longer needed for standard <img> tag
 
 const SubCategoryTable = ({ subCategories, onAddSubCategory, onEditSubCategory, onDeleteSubCategory, handleRefresh, editingSubCategory, setEditingSubCategory }) => {
   return (
@@ -27,6 +28,8 @@ const SubCategoryTable = ({ subCategories, onAddSubCategory, onEditSubCategory, 
         <table className="min-w-[1370px] text-left border-collapse">
           <thead className="bg-[#1e2235]">
             <tr>
+              {/* NEW COLUMN: Image */}
+              <th className="px-6 py-3 text-sm font-semibold text-gray-300">Image</th> 
               <th className="px-12 py-6 text-sm font-semibold text-gray-300">Sub-category Name</th>
               <th className="px-12 py-3 text-sm font-semibold text-gray-300">Parent Category</th>
               <th className="px-12 py-3 text-sm font-semibold text-gray-300">Date</th>
@@ -37,13 +40,27 @@ const SubCategoryTable = ({ subCategories, onAddSubCategory, onEditSubCategory, 
           <tbody>
             {subCategories.length === 0 ? (
               <tr className="border-t border-gray-700">
-                <td colSpan="5" className="px-12 py-4 text-center text-gray-400">
+                <td colSpan="6" className="px-12 py-4 text-center text-gray-400"> {/* Increased colSpan */}
                   No sub-categories found.
                 </td>
               </tr>
             ) : (
               subCategories.map(subCategory => (
                 <tr key={subCategory._id} className="border-t border-gray-700">
+                  {/* FIXED: Replaced next/image with standard <img> */}
+                  <td className="px-6 py-4">
+                    {subCategory.image ? (
+                      <img
+                        src={subCategory.image}
+                        alt={subCategory.name}
+                        // Use inline styles or utility classes for size
+                        style={{ width: '50px', height: '50px' }}
+                        className="rounded-full object-cover"
+                      />
+                    ) : (
+                      <Layers className="h-8 w-8 text-gray-500" />
+                    )}
+                  </td>
                   <td className="px-12 py-4">{subCategory.name}</td>
                   <td className="px-12 py-4">{subCategory.categoryId?.name || 'N/A'}</td>
                   <td className="px-12 py-4">{new Date(subCategory.createdAt).toLocaleDateString()}</td>

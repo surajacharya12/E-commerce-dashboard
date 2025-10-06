@@ -16,15 +16,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 
-/*
-  Props (expected):
-  - children (trigger)
-  - onAddProduct(payload) -> payload can be FormData or object
-  - onEditProduct(id, payload)
-  - initialData (product to edit)
-  - categories, subcategories, brands, variantTypes, variants  (arrays)
-  - setEditingProduct (optional)
-*/
 
 export default function AddProductDialog({
   children,
@@ -61,23 +52,28 @@ export default function AddProductDialog({
       setPrice(initialData.price ?? "");
       setOfferPrice(initialData.offerPrice ?? "");
       setQuantity(initialData.quantity ?? "");
-      setCategoryId(initialData.categoryId || "");
-      setSubcategoryId(initialData.subcategoryId || "");
-      setBrandId(initialData.brandId || "");
-      setVariantTypeId(initialData.variantTypeId || "");
-      setVariantId(initialData.variantId || "");
+      // Use initialData for dropdowns, safely accessing _id from populated objects
+      setCategoryId(initialData.proCategoryId?._id || "");
+      setSubcategoryId(initialData.proSubCategoryId?._id || "");
+      setBrandId(initialData.proBrandId?._id || "");
+      setVariantTypeId(initialData.proVariantTypeId?._id || "");
+      // Assuming variantId holds a single selected variant's ID
+      setVariantId(Array.isArray(initialData.proVariantId) && initialData.proVariantId.length > 0 ? initialData.proVariantId[0]?._id : "");
+
+
       // If initialData.images contains URLs, use them as previews
       if (initialData.images && Array.isArray(initialData.images)) {
         const previews = Array(5).fill(null);
-        initialData.images.slice(0, 5).forEach((imgUrl, idx) => {
-          previews[idx] = imgUrl;
+        initialData.images.slice(0, 5).forEach((imgObj, idx) => {
+          previews[idx] = imgObj.url; // Assuming image object has a 'url' property
         });
         setImagePreviews(previews);
       } else {
         setImagePreviews(Array(5).fill(null));
       }
-      setImageFiles(Array(5).fill(null));
+      setImageFiles(Array(5).fill(null)); // Clear actual files when editing, new files will overwrite
     } else {
+      // Reset all states when dialog opens for a new product
       setName("");
       setDescription("");
       setPrice("");
@@ -94,9 +90,11 @@ export default function AddProductDialog({
     setErrors({});
   }, [initialData, isOpen]);
 
-  const filteredSubcategories = subcategories.filter((s) => !categoryId || s.categoryId === categoryId);
-  const filteredBrands = brands.filter((b) => !subcategoryId || b.subcategoryId === subcategoryId);
-  const filteredVariants = variants.filter((v) => !variantTypeId || v.variantTypeId === variantTypeId);
+
+  const allSubcategories = subcategories;
+  const allBrands = brands;
+  const allVariants = variants;
+
 
   const handleImageChange = (index, file) => {
     if (!file) return;
@@ -123,68 +121,54 @@ export default function AddProductDialog({
   };
 
   const buildPayload = () => {
-    // Use FormData if any image files present, otherwise return plain object
-    const hasFiles = imageFiles.some((f) => f);
-    if (hasFiles) {
-      const fd = new FormData();
-      fd.append("name", name);
-      fd.append("description", description);
-      fd.append("price", price);
-      if (offerPrice !== "") fd.append("offerPrice", offerPrice);
-      fd.append("quantity", quantity);
-      if (categoryId) fd.append("categoryId", categoryId);
-      if (subcategoryId) fd.append("subcategoryId", subcategoryId);
-      if (brandId) fd.append("brandId", brandId);
-      if (variantTypeId) fd.append("variantTypeId", variantTypeId);
-      if (variantId) fd.append("variantId", variantId);
+    const fd = new FormData();
 
-      // Append files as images[] so backend can accept multiple files.
-      imageFiles.forEach((file, idx) => {
-        if (file) {
-          // name each file field consistently if backend expects named fields
-          fd.append("images", file);
-        }
-      });
+    fd.append("name", name);
+    fd.append("description", description);
+    fd.append("price", price);
+    if (offerPrice !== "") fd.append("offerPrice", offerPrice);
+    fd.append("quantity", quantity);
 
-      return fd;
-    } else {
-      // plain object
-      return {
-        name,
-        description,
-        price: price === "" ? null : parseFloat(price),
-        offerPrice: offerPrice === "" ? null : parseFloat(offerPrice),
-        quantity: quantity === "" ? 0 : parseInt(quantity),
-        categoryId,
-        subcategoryId,
-        brandId,
-        variantTypeId,
-        variantId,
-        images: imagePreviews.filter(Boolean), // preview urls (only if you want to keep them)
-      };
-    }
+    if (categoryId) fd.append("proCategoryId", categoryId);
+    if (subcategoryId) fd.append("proSubCategoryId", subcategoryId);
+    if (brandId) fd.append("proBrandId", brandId);
+    if (variantTypeId) fd.append("proVariantTypeId", variantTypeId);
+    // proVariantId should be an array on the backend, but select sends a single string.
+    // Backend will handle conversion or array wrapper.
+    if (variantId) fd.append("proVariantId", variantId);
+
+    imageFiles.forEach((file, idx) => {
+      if (file) {
+        fd.append(`image${idx + 1}`, file); // Backend expects image1, image2 etc.
+      }
+    });
+
+    return fd;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
     const payload = buildPayload();
 
-    if (initialData && (initialData.id || initialData._id)) {
-      // call parent edit handler (expected signature: onEditProduct(id, payload))
-      const id = initialData.id || initialData._id;
-      if (typeof onEditProduct === "function") {
-        onEditProduct(id, payload);
+    try {
+      if (initialData && (initialData.id || initialData._id)) {
+        const id = initialData.id || initialData._id;
+        if (typeof onEditProduct === "function") {
+          await onEditProduct(id, payload);
+        }
+      } else {
+        if (typeof onAddProduct === "function") {
+          await onAddProduct(payload);
+        }
       }
-    } else {
-      if (typeof onAddProduct === "function") {
-        onAddProduct(payload);
-      }
+      setIsOpen(false);
+      if (typeof setEditingProduct === "function") setEditingProduct(null);
+    } catch (error) {
+      console.error("Error submitting product form:", error);
+      alert("Failed to save product. Please try again.");
     }
-
-    setIsOpen(false);
-    if (typeof setEditingProduct === "function") setEditingProduct(null);
   };
 
   return (
@@ -237,7 +221,14 @@ export default function AddProductDialog({
           {/* Category / Subcategory / Brand */}
           <div className="grid grid-cols-3 gap-2">
             <div>
-              <Select value={categoryId} onValueChange={(val) => { setCategoryId(val); setSubcategoryId(""); setBrandId(""); }}>
+              <Select
+                value={categoryId}
+                onValueChange={(val) => {
+                  setCategoryId(val);
+                  setSubcategoryId(""); // Reset subcategory when category changes
+                  setBrandId("");       // Reset brand when category changes
+                }}
+              >
                 <SelectTrigger className={errors.categoryId ? "border-red-500" : ""}><SelectValue placeholder="Select Category" /></SelectTrigger>
                 <SelectContent>
                   {categories.length === 0 ? (
@@ -251,13 +242,19 @@ export default function AddProductDialog({
             </div>
 
             <div>
-              <Select value={subcategoryId} onValueChange={(val) => { setSubcategoryId(val); setBrandId(""); }}>
+              <Select
+                value={subcategoryId}
+                onValueChange={(val) => {
+                  setSubcategoryId(val);
+                  setBrandId("");       // Reset brand when subcategory changes
+                }}
+              >
                 <SelectTrigger className={errors.subcategoryId ? "border-red-500" : ""}><SelectValue placeholder="Sub Category" /></SelectTrigger>
                 <SelectContent>
-                  {filteredSubcategories.length === 0 ? (
+                  {allSubcategories.length === 0 ? (
                     <SelectItem value="__no_subcategories__" disabled>No subcategories found</SelectItem>
                   ) : (
-                    filteredSubcategories.map((s) => <SelectItem key={s.id || s._id} value={s.id || s._id}>{s.name}</SelectItem>)
+                    allSubcategories.map((s) => <SelectItem key={s.id || s._id} value={s.id || s._id}>{s.name}</SelectItem>)
                   )}
                 </SelectContent>
               </Select>
@@ -268,10 +265,10 @@ export default function AddProductDialog({
               <Select value={brandId} onValueChange={setBrandId}>
                 <SelectTrigger className={errors.brandId ? "border-red-500" : ""}><SelectValue placeholder="Select Brand" /></SelectTrigger>
                 <SelectContent>
-                  {filteredBrands.length === 0 ? (
+                  {allBrands.length === 0 ? (
                     <SelectItem value="__no_brands__" disabled>No brands found</SelectItem>
                   ) : (
-                    filteredBrands.map((b) => <SelectItem key={b.id || b._id} value={b.id || b._id}>{b.name}</SelectItem>)
+                    allBrands.map((b) => <SelectItem key={b.id || b._id} value={b.id || b._id}>{b.name}</SelectItem>)
                   )}
                 </SelectContent>
               </Select>
@@ -297,7 +294,13 @@ export default function AddProductDialog({
 
           {/* Variant Row */}
           <div className="grid grid-cols-2 gap-2">
-            <Select value={variantTypeId} onValueChange={(val) => { setVariantTypeId(val); setVariantId(""); }}>
+            <Select
+              value={variantTypeId}
+              onValueChange={(val) => {
+                setVariantTypeId(val);
+                setVariantId("");     // Reset variant when variant type changes
+              }}
+            >
               <SelectTrigger><SelectValue placeholder="Select Variant Type" /></SelectTrigger>
               <SelectContent>
                 {variantTypes.length === 0 ? (
@@ -311,10 +314,10 @@ export default function AddProductDialog({
             <Select value={variantId} onValueChange={setVariantId}>
               <SelectTrigger><SelectValue placeholder="Select Variant" /></SelectTrigger>
               <SelectContent>
-                {filteredVariants.length === 0 ? (
+                {allVariants.length === 0 ? (
                   <SelectItem value="__no_variants__" disabled>No variants found</SelectItem>
                 ) : (
-                  filteredVariants.map((v) => <SelectItem key={v.id || v._id} value={v.id || v._id}>{v.name}</SelectItem>)
+                  allVariants.map((v) => <SelectItem key={v.id || v._id} value={v.id || v._id}>{v.name}</SelectItem>)
                 )}
               </SelectContent>
             </Select>

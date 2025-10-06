@@ -9,6 +9,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -24,7 +25,7 @@ import {
   Warehouse,
 } from "lucide-react"
 
-// Store badge options using Lucide-React icons
+// Store badge options (omitted for brevity)
 const storeBadges = [
   { name: "Store", value: "Store", icon: StoreIcon },
   { name: "Building 2", value: "Building2", icon: Building2 },
@@ -35,7 +36,7 @@ const storeBadges = [
   { name: "Warehouse", value: "Warehouse", icon: Warehouse },
 ]
 
-// Predefined gradient color combinations in Tailwind format
+// Gradient color options (omitted for brevity)
 const gradientOptions = [
   { name: 'Blue to Purple', value: 'from-blue-500 to-purple-600' },
   { name: 'Orange to Red', value: 'from-orange-500 to-red-600' },
@@ -47,7 +48,14 @@ const gradientOptions = [
   { name: 'Amber to Orange', value: 'from-amber-500 to-orange-600' },
 ];
 
-export default function AddStoreDialog({ children, onAddStore, onEditStore, initialData }) {
+export default function AddStoreDialog({
+  children,
+  onAddStore,
+  onEditStore,
+  initialData,
+  isOpen,
+  setIsOpen
+}) {
   const [storeName, setStoreName] = useState("")
   const [storeManagerName, setStoreManagerName] = useState("")
   const [storeEmail, setStoreEmail] = useState("")
@@ -56,10 +64,11 @@ export default function AddStoreDialog({ children, onAddStore, onEditStore, init
   const [storeLocation, setStoreLocation] = useState("")
   const [storeBadge, setStoreBadge] = useState("")
   const [storeManagerPhoto, setStoreManagerPhoto] = useState(null)
+  const [filePhoto, setFilePhoto] = useState(null)
   const [gradientColor, setGradientColor] = useState("")
-  const [isOpen, setIsOpen] = useState(false)
-  const [errors, setErrors] = useState({}) // State to store validation errors
+  const [errors, setErrors] = useState({})
 
+  // Populate form with initial data
   useEffect(() => {
     if (initialData) {
       setStoreName(initialData.storeName || "")
@@ -70,60 +79,55 @@ export default function AddStoreDialog({ children, onAddStore, onEditStore, init
       setStoreLocation(initialData.storeLocation || "")
       setStoreBadge(initialData.storeBadge || "")
       setStoreManagerPhoto(initialData.storeManagerPhoto || null)
+      setFilePhoto(null)
       setGradientColor(initialData.gradientColor || "")
     } else {
-      setStoreName("")
-      setStoreManagerName("")
-      setStoreEmail("")
-      setStorePhoneNumber("")
-      setStoreDescription("")
-      setStoreLocation("")
-      setStoreBadge("")
-      setStoreManagerPhoto(null)
-      setGradientColor("")
+      resetForm()
     }
-    setErrors({});
+    setErrors({})
   }, [initialData])
+
+  const resetForm = () => {
+    setStoreName("")
+    setStoreManagerName("")
+    setStoreEmail("")
+    setStorePhoneNumber("")
+    setStoreDescription("")
+    setStoreLocation("")
+    setStoreBadge("")
+    setStoreManagerPhoto(null)
+    setFilePhoto(null)
+    setGradientColor("")
+    setErrors({})
+  }
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       setStoreManagerPhoto(URL.createObjectURL(e.target.files[0]))
+      setFilePhoto(e.target.files[0])
     }
   }
 
   const validateForm = () => {
-    const newErrors = {};
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^\d{10}$/;
+    const newErrors = {}
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    const phoneRegex = /^\d{10}$/
 
-    if (!storeName.trim()) {
-      newErrors.storeName = "Store name is required.";
-    }
-    if (!storeManagerName.trim()) {
-      newErrors.storeManagerName = "Manager name is required.";
-    }
-    if (!storeEmail.trim() || !emailRegex.test(storeEmail)) {
-      newErrors.storeEmail = "A valid email address is required.";
-    }
-    if (!storePhoneNumber.trim() || !phoneRegex.test(storePhoneNumber)) {
-      newErrors.storePhoneNumber = "Phone number must be exactly 10 digits.";
-    }
-    if (!storeLocation.trim()) {
-      newErrors.storeLocation = "Store location is required.";
-    }
+    if (!storeName.trim()) newErrors.storeName = "Store name is required."
+    if (!storeManagerName.trim()) newErrors.storeManagerName = "Manager name is required."
+    if (!storeEmail.trim() || !emailRegex.test(storeEmail)) newErrors.storeEmail = "A valid email address is required."
+    if (!storePhoneNumber.trim() || !phoneRegex.test(storePhoneNumber)) newErrors.storePhoneNumber = "Phone number must be exactly 10 digits."
+    if (!storeLocation.trim()) newErrors.storeLocation = "Store location is required."
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!validateForm()) {
-      return;
-    }
+    e.preventDefault()
+    if (!validateForm()) return
 
     const storeData = {
-      id: initialData?.id || Date.now(),
       storeName,
       storeManagerName,
       storeEmail,
@@ -131,16 +135,26 @@ export default function AddStoreDialog({ children, onAddStore, onEditStore, init
       storeDescription,
       storeLocation,
       storeBadge,
-      storeManagerPhoto,
+      storeManagerPhoto: filePhoto, // This is the new File object (or null)
       gradientColor,
-      date: new Date().toLocaleDateString(),
     }
+
     if (initialData) {
+      storeData._id = initialData._id
+      
+      // If no new file was selected (filePhoto is null), 
+      // pass the original URL string so the backend keeps the existing photo.
+      if (!filePhoto) {
+          storeData.storeManagerPhoto = initialData.storeManagerPhoto || "no_url";
+      }
+      
       onEditStore(storeData)
     } else {
       onAddStore(storeData)
     }
-    setIsOpen(false);
+
+    resetForm()
+    setIsOpen?.(false)
   }
 
   return (
@@ -154,119 +168,104 @@ export default function AddStoreDialog({ children, onAddStore, onEditStore, init
         </AlertDialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+          {/* Store Name */}
           <div>
             <Input
               placeholder="Store Name"
               value={storeName}
               onChange={(e) => {
-                setStoreName(e.target.value);
-                setErrors(prev => ({ ...prev, storeName: null }));
+                setStoreName(e.target.value)
+                setErrors(prev => ({ ...prev, storeName: null }))
               }}
               className={errors.storeName ? "border-red-500" : ""}
             />
             {errors.storeName && <p className="text-red-500 text-sm mt-1">{errors.storeName}</p>}
           </div>
 
+          {/* Manager Name */}
           <div>
             <Input
               placeholder="Store Manager Name"
               value={storeManagerName}
               onChange={(e) => {
-                setStoreManagerName(e.target.value);
-                setErrors(prev => ({ ...prev, storeManagerName: null }));
+                setStoreManagerName(e.target.value)
+                setErrors(prev => ({ ...prev, storeManagerName: null }))
               }}
               className={errors.storeManagerName ? "border-red-500" : ""}
             />
             {errors.storeManagerName && <p className="text-red-500 text-sm mt-1">{errors.storeManagerName}</p>}
           </div>
 
+          {/* Email */}
           <div>
             <Input
               placeholder="Store Email Address"
               type="email"
               value={storeEmail}
               onChange={(e) => {
-                setStoreEmail(e.target.value);
-                setErrors(prev => ({ ...prev, storeEmail: null }));
+                setStoreEmail(e.target.value)
+                setErrors(prev => ({ ...prev, storeEmail: null }))
               }}
               className={errors.storeEmail ? "border-red-500" : ""}
             />
             {errors.storeEmail && <p className="text-red-500 text-sm mt-1">{errors.storeEmail}</p>}
           </div>
 
+          {/* Phone */}
           <div>
             <Input
               placeholder="Store Phone Number"
               type="tel"
               value={storePhoneNumber}
               onChange={(e) => {
-                setStorePhoneNumber(e.target.value);
-                setErrors(prev => ({ ...prev, storePhoneNumber: null }));
+                setStorePhoneNumber(e.target.value)
+                setErrors(prev => ({ ...prev, storePhoneNumber: null }))
               }}
               className={errors.storePhoneNumber ? "border-red-500" : ""}
             />
             {errors.storePhoneNumber && <p className="text-red-500 text-sm mt-1">{errors.storePhoneNumber}</p>}
           </div>
 
+          {/* Description */}
           <Textarea
             placeholder="Description"
             value={storeDescription}
             onChange={(e) => setStoreDescription(e.target.value)}
           />
 
+          {/* Location */}
           <div>
             <Input
               placeholder="Store Location"
               value={storeLocation}
               onChange={(e) => {
-                setStoreLocation(e.target.value);
-                setErrors(prev => ({ ...prev, storeLocation: null }));
+                setStoreLocation(e.target.value)
+                setErrors(prev => ({ ...prev, storeLocation: null }))
               }}
               className={errors.storeLocation ? "border-red-500" : ""}
             />
             {errors.storeLocation && <p className="text-red-500 text-sm mt-1">{errors.storeLocation}</p>}
           </div>
 
-          {/* Store Manager Photo Upload */}
+          {/* Manager Photo */}
           <div className="flex flex-col items-center justify-center border rounded-lg p-6 bg-muted/20 cursor-pointer hover:bg-muted relative">
             <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer">
               {storeManagerPhoto ? (
                 <img src={storeManagerPhoto} alt="Store Manager" className="w-full h-full object-cover rounded" />
               ) : (
                 <div className="flex flex-col items-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-10 w-10 text-gray-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 13V9a1 1 0 011-1h4a1 1 0 011 1v4m-2 4h-2m-2-2h4"
-                    />
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13V9a1 1 0 011-1h4a1 1 0 011 1v4m-2 4h-2m-2-2h4" />
                   </svg>
                   <span className="mt-2 text-sm text-gray-500">Store Manager Photo</span>
                 </div>
               )}
-              <Input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageChange}
-              />
+              <Input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
             </label>
           </div>
 
-          {/* Store Badge Dropdown with Lucide-React icons */}
+          {/* Store Badge */}
           <Select onValueChange={setStoreBadge} value={storeBadge}>
             <SelectTrigger>
               <SelectValue placeholder="Store Badge (React Lucide)" />
@@ -283,7 +282,7 @@ export default function AddStoreDialog({ children, onAddStore, onEditStore, init
             </SelectContent>
           </Select>
 
-          {/* Gradient Color Selection */}
+          {/* Gradient Color */}
           <div>
             <span className="text-sm font-medium text-gray-400">Gradient Colors (React/Tailwind Format)</span>
             <div className="flex flex-wrap gap-2 mt-2">
@@ -298,16 +297,7 @@ export default function AddStoreDialog({ children, onAddStore, onEditStore, init
                   `}
                 >
                   {gradientColor === gradient.value && (
-                    <svg
-                      className="h-6 w-6 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
+                    <svg className="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
                   )}
@@ -318,13 +308,10 @@ export default function AddStoreDialog({ children, onAddStore, onEditStore, init
         </form>
 
         <AlertDialogFooter className="mt-6">
-          <AlertDialogCancel onClick={() => setIsOpen(false)}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel onClick={() => { resetForm(); setIsOpen?.(false) }}>Cancel</AlertDialogCancel>
+
           <AlertDialogAction asChild>
-            <Button
-              type="submit"
-              onClick={handleSubmit}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
+            <Button type="submit" onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700 text-white">
               {initialData ? "Save Changes" : "Submit"}
             </Button>
           </AlertDialogAction>

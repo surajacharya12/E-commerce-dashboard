@@ -2,8 +2,8 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { 
-  Grid, Tag, Layers, Box, Repeat, Type, ShoppingCart, Gift, Percent, Image, Bell, MapPin, LogOut 
+import {
+  Grid, Tag, Layers, Box, Package, Repeat, Type, ShoppingCart, Gift, Percent, Image, Bell, MapPin, LogOut
 } from "lucide-react"
 
 import {
@@ -22,6 +22,7 @@ const items = [
   { title: "Category", url: "/category", icon: Tag },
   { title: "Sub Category", url: "/subcategory", icon: Layers },
   { title: "Brand", url: "/brand", icon: Box },
+  { title: "Products", url: "/product", icon: Package },
   { title: "Variant", url: "/variant", icon: Repeat },
   { title: "Variant Type", url: "/varianttype", icon: Type },
   { title: "Order", url: "/order", icon: ShoppingCart },
@@ -41,10 +42,10 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>
-            <img 
-              src="/assets/images/logo.png" 
-              alt="Logo" 
-              className="w-57 h-auto mx-auto mt-10" 
+            <img
+              src="/assets/images/logo.png"
+              alt="Logo"
+              className="w-57 h-auto mx-auto mt-10"
             />
           </SidebarGroupLabel>
 
@@ -57,11 +58,10 @@ export function AppSidebar() {
                     <SidebarMenuButton asChild>
                       <Link
                         href={item.url}
-                        className={`flex items-center gap-2 px-4 py-2 rounded ${
-                          isActive
-                            ? "bg-blue-500 text-white font-semibold"
-                            : "hover:bg-gray-100"
-                        }`}
+                        className={`flex items-center gap-2 px-4 py-2 rounded ${isActive
+                          ? "bg-blue-500 text-white font-semibold"
+                          : "hover:bg-gray-100"
+                          }`}
                       >
                         <item.icon />
                         <span>{item.title}</span>
