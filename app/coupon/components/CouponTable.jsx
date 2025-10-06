@@ -72,10 +72,10 @@ const CouponTable = ({ coupons, onAddCoupon, onEditCoupon, onDeleteCoupon, onRef
                   <td className="px-12 py-4 capitalize">{coupon.status}</td>
                   <td className="px-12 py-4 capitalize">{coupon.discountType}</td>
                   <td className="px-12 py-4">
-                    {coupon.discountType === 'percentage' ? `${coupon.discountAmount}%` : `$${coupon.discountAmount}`}
+                    {coupon.discountType === 'percentage' ? `${coupon.discountAmount}%` : `Rs. ${coupon.discountAmount}`}
                   </td>
                   <td className="px-12 py-4">
-                    {coupon.minimumPurchaseAmount ? `$${coupon.minimumPurchaseAmount}` : 'N/A'}
+                    {coupon.minimumPurchaseAmount ? `Rs. ${coupon.minimumPurchaseAmount}` : 'N/A'}
                   </td>
                   <td className="px-12 py-4">{new Date(coupon.selectDate).toLocaleDateString()}</td>
                   <td className="px-12 py-4">

@@ -16,7 +16,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 
-
 export default function AddProductDialog({
   children,
   onAddProduct,
@@ -42,6 +41,7 @@ export default function AddProductDialog({
   const [brandId, setBrandId] = useState("");
   const [variantTypeId, setVariantTypeId] = useState("");
   const [variantId, setVariantId] = useState("");
+  const [adminRating, setAdminRating] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [errors, setErrors] = useState({});
 
@@ -51,7 +51,9 @@ export default function AddProductDialog({
       setDescription(initialData.description || "");
       setPrice(initialData.price ?? "");
       setOfferPrice(initialData.offerPrice ?? "");
-      setQuantity(initialData.quantity ?? "");
+      setQuantity(initialData.stock?.toString() || initialData.quantity?.toString() || "");
+      setAdminRating(initialData.rating?.adminRating?.toString() || "");
+
       // Use initialData for dropdowns, safely accessing _id from populated objects
       setCategoryId(initialData.proCategoryId?._id || "");
       setSubcategoryId(initialData.proSubCategoryId?._id || "");
@@ -59,7 +61,6 @@ export default function AddProductDialog({
       setVariantTypeId(initialData.proVariantTypeId?._id || "");
       // Assuming variantId holds a single selected variant's ID
       setVariantId(Array.isArray(initialData.proVariantId) && initialData.proVariantId.length > 0 ? initialData.proVariantId[0]?._id : "");
-
 
       // If initialData.images contains URLs, use them as previews
       if (initialData.images && Array.isArray(initialData.images)) {
@@ -79,6 +80,7 @@ export default function AddProductDialog({
       setPrice("");
       setOfferPrice("");
       setQuantity("");
+      setAdminRating("");
       setCategoryId("");
       setSubcategoryId("");
       setBrandId("");
@@ -90,11 +92,9 @@ export default function AddProductDialog({
     setErrors({});
   }, [initialData, isOpen]);
 
-
   const allSubcategories = subcategories;
   const allBrands = brands;
   const allVariants = variants;
-
 
   const handleImageChange = (index, file) => {
     if (!file) return;
@@ -128,6 +128,8 @@ export default function AddProductDialog({
     fd.append("price", price);
     if (offerPrice !== "") fd.append("offerPrice", offerPrice);
     fd.append("quantity", quantity);
+    fd.append("stock", quantity); // Use same value for stock
+    if (adminRating !== "") fd.append("adminRating", adminRating);
 
     if (categoryId) fd.append("proCategoryId", categoryId);
     if (subcategoryId) fd.append("proSubCategoryId", subcategoryId);
@@ -229,7 +231,9 @@ export default function AddProductDialog({
                   setBrandId("");       // Reset brand when category changes
                 }}
               >
-                <SelectTrigger className={errors.categoryId ? "border-red-500" : ""}><SelectValue placeholder="Select Category" /></SelectTrigger>
+                <SelectTrigger className={errors.categoryId ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Select Category" />
+                </SelectTrigger>
                 <SelectContent>
                   {categories.length === 0 ? (
                     <SelectItem value="__no_categories__" disabled>No categories found</SelectItem>
@@ -249,7 +253,9 @@ export default function AddProductDialog({
                   setBrandId("");       // Reset brand when subcategory changes
                 }}
               >
-                <SelectTrigger className={errors.subcategoryId ? "border-red-500" : ""}><SelectValue placeholder="Sub Category" /></SelectTrigger>
+                <SelectTrigger className={errors.subcategoryId ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Sub Category" />
+                </SelectTrigger>
                 <SelectContent>
                   {allSubcategories.length === 0 ? (
                     <SelectItem value="__no_subcategories__" disabled>No subcategories found</SelectItem>
@@ -263,7 +269,9 @@ export default function AddProductDialog({
 
             <div>
               <Select value={brandId} onValueChange={setBrandId}>
-                <SelectTrigger className={errors.brandId ? "border-red-500" : ""}><SelectValue placeholder="Select Brand" /></SelectTrigger>
+                <SelectTrigger className={errors.brandId ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Select Brand" />
+                </SelectTrigger>
                 <SelectContent>
                   {allBrands.length === 0 ? (
                     <SelectItem value="__no_brands__" disabled>No brands found</SelectItem>
@@ -277,18 +285,50 @@ export default function AddProductDialog({
           </div>
 
           {/* Price Row */}
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             <div>
-              <Input placeholder="Price" value={price} onChange={(e) => setPrice(e.target.value)} type="number" step="0.01" className={errors.price ? "border-red-500" : ""} />
+              <Input
+                placeholder="Price"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                type="number"
+                step="0.01"
+                className={errors.price ? "border-red-500" : ""}
+              />
               {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
             </div>
             <div>
-              <Input placeholder="Offer Price" value={offerPrice} onChange={(e) => setOfferPrice(e.target.value)} type="number" step="0.01" className={errors.offerPrice ? "border-red-500" : ""} />
+              <Input
+                placeholder="Offer Price"
+                value={offerPrice}
+                onChange={(e) => setOfferPrice(e.target.value)}
+                type="number"
+                step="0.01"
+                className={errors.offerPrice ? "border-red-500" : ""}
+              />
               {errors.offerPrice && <p className="text-red-500 text-sm mt-1">{errors.offerPrice}</p>}
             </div>
             <div>
-              <Input placeholder="Quantity" value={quantity} onChange={(e) => setQuantity(e.target.value)} type="number" step="1" className={errors.quantity ? "border-red-500" : ""} />
+              <Input
+                placeholder="Quantity"
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                type="number"
+                step="1"
+                className={errors.quantity ? "border-red-500" : ""}
+              />
               {errors.quantity && <p className="text-red-500 text-sm mt-1">{errors.quantity}</p>}
+            </div>
+            <div>
+              <Input
+                placeholder="Admin Rating (1-5)"
+                value={adminRating}
+                onChange={(e) => setAdminRating(e.target.value)}
+                type="number"
+                step="0.1"
+                min="0"
+                max="5"
+              />
             </div>
           </div>
 
@@ -301,7 +341,9 @@ export default function AddProductDialog({
                 setVariantId("");     // Reset variant when variant type changes
               }}
             >
-              <SelectTrigger><SelectValue placeholder="Select Variant Type" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Select Variant Type" />
+              </SelectTrigger>
               <SelectContent>
                 {variantTypes.length === 0 ? (
                   <SelectItem value="__no_variant_types__" disabled>No variant types found</SelectItem>
@@ -312,7 +354,9 @@ export default function AddProductDialog({
             </Select>
 
             <Select value={variantId} onValueChange={setVariantId}>
-              <SelectTrigger><SelectValue placeholder="Select Variant" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Select Variant" />
+              </SelectTrigger>
               <SelectContent>
                 {allVariants.length === 0 ? (
                   <SelectItem value="__no_variants__" disabled>No variants found</SelectItem>

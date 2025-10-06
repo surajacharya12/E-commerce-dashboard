@@ -75,7 +75,7 @@ const OrderTable = ({
               orders.map((order) => (
                 <tr key={order.id} className="border-t border-gray-700">
                   <td className="px-12 py-4">{order.customerName}</td>
-                  <td className="px-12 py-4">${order.orderAmount.toFixed(2)}</td>
+                  <td className="px-12 py-4">Rs. {order.orderAmount.toFixed(2)}</td>
                   <td className="px-12 py-4">{order.payment}</td>
                   <td className="px-12 py-4">{order.status}</td>
                   <td className="px-12 py-4">{order.date}</td>

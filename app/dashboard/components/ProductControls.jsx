@@ -1,7 +1,8 @@
 "use client";
 
-import { AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { FileText, RefreshCw, Plus, PackageX, PackageMinus, PackageCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import AddProductDialog from "./AddProductDialog";
 
 const ProductControls = ({
@@ -14,21 +15,22 @@ const ProductControls = ({
   categories,
   subcategories,
   brands,
-  variantTypes,
-  variants,
+  variantTypes = [],
+  variants = [],
 }) => {
   return (
     <div className="mb-10">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-gray-300">My Products</h2>
         <div className="flex items-center gap-8">
-          <button onClick={onRefresh} className="p-2 rounded-lg bg-[#2a2f45] hover:bg-[#353b52] border border-gray-700">
-            <RefreshCw className="h-5 w-5 text-gray-300" />
-          </button>
+          <Button onClick={onRefresh} variant="outline" className="bg-green-50 hover:bg-green-100 text-black">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
 
           <AddProductDialog
             onAddProduct={onAddProduct}
-            onEditProduct={(id, payload) => onEditProduct(id, payload)}
+            onEditProduct={onEditProduct}
             initialData={editingProduct}
             categories={categories}
             subcategories={subcategories}
@@ -38,9 +40,10 @@ const ProductControls = ({
             setEditingProduct={setEditingProduct}
           >
             <AlertDialogTrigger asChild>
-              <button onClick={() => setEditingProduct(null)} className="flex items-center gap-5 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-medium shadow">
-                <Plus className="h-5 w-5" /> Add New
-              </button>
+              <Button onClick={() => setEditingProduct(null)} className="bg-blue-600 hover:bg-blue-700">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Product
+              </Button>
             </AlertDialogTrigger>
           </AddProductDialog>
         </div>

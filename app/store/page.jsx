@@ -1,9 +1,10 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from "react";
 import TopBar from "./components/TopBar";
 import StoreTable from "./components/StoreTable";
 import url from "../http/page";
+import { Store as StoreIcon } from "lucide-react";
 
 export default function Store() {
   const [stores, setStores] = useState([]);
@@ -49,17 +50,17 @@ export default function Store() {
   const handleEditStore = async (updatedStoreData) => {
     try {
       const formData = new FormData();
-      
+
       for (const key in updatedStoreData) {
         // Skip _id as it's used in the URL
-        if (key === '_id') continue; 
+        if (key === '_id') continue;
 
         const value = updatedStoreData[key];
 
         // 1. If it's a new file, append the File object
         if (key === 'storeManagerPhoto' && value instanceof File) {
           formData.append(key, value);
-        } 
+        }
         // 2. If it's the photo field and it's a URL string (old photo), append the string value.
         // 3. For all other fields (name, email, etc.), append the value.
         else if (!(key === 'storeManagerPhoto' && value === null)) {
@@ -89,9 +90,11 @@ export default function Store() {
     <div className="flex min-h-screen bg-[#111827] text-white">
       <main className="flex-1 flex flex-col md:p-10 gap-10 overflow-y-auto">
         <TopBar
+          pageTitle="Store"
+          itemCount={filteredStores.length}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
-          total={filteredStores.length}
+          icon={StoreIcon}
         />
         <StoreTable
           stores={filteredStores}

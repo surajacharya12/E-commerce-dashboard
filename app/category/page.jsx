@@ -1,9 +1,10 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from "react";
 import TopBar from "./components/TopBar";
 import CategoryTable from "./components/CategoryTable";
 import url from "../http/page";
+import { Grid3X3 } from "lucide-react";
 
 const API_URL = url + "categories";
 
@@ -103,6 +104,7 @@ export default function Category() {
           itemCount={categories.length}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
+          icon={Grid3X3}
         />
         <CategoryTable
           categories={filteredCategories}

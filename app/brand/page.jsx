@@ -1,10 +1,11 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from "react";
 import TopBar from "./components/TopBar";
 import BrandTable from "./components/BrandTable";
 import { toast } from "react-hot-toast";
 import url from "../http/page";
+import { Tag } from "lucide-react";
 
 export default function Brand() {
   const [brands, setBrands] = useState([]);
@@ -119,6 +120,7 @@ export default function Brand() {
           itemCount={brands.length}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
+          icon={Tag}
         />
         <BrandTable
           brands={filteredBrands}

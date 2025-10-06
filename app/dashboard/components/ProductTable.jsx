@@ -1,8 +1,9 @@
 "use client";
 
-import { Edit, Trash2 } from "lucide-react";
-import AddProductDialog from "./AddProductDialog";
+import { Edit, Trash2, Package, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import AddProductDialog from "./AddProductDialog";
 
 const ProductsTable = ({
   products = [],
@@ -11,70 +12,188 @@ const ProductsTable = ({
   onSetEditingProduct,
   categories = [],
   subcategories = [],
+  brands = [],
+  variantTypes = [],
+  variants = [],
 }) => {
-  // Use product.proCategoryId._id and product.proSubCategoryId._id for lookup
-  const getCategoryName = (product) => categories.find((c) => (c._id) === product.proCategoryId?._id)?.name;
-  const getSubCategoryName = (product) => subcategories.find((s) => (s._id) === product.proSubCategoryId?._id)?.name;
-
+  const handleEdit = (product) => {
+    onSetEditingProduct(product);
+  };
 
   return (
-    <div className="bg-[#2a2f45] rounded-xl shadow overflow-hidden border border-gray-700">
-      <table className="w-full text-left border-collapse">
-        <thead className="bg-[#1e2235]">
-          <tr>
-            <th className="px-6 py-3 text-sm font-semibold text-gray-300">Product Name</th>
-            <th className="px-6 py-3 text-sm font-semibold text-gray-300">Category</th>
-            <th className="px-6 py-3 text-sm font-semibold text-gray-300">Sub Category</th>
-            <th className="px-6 py-3 text-sm font-semibold text-gray-300">Price</th>
-            <th className="px-6 py-3 text-sm font-semibold text-gray-300">Edit</th>
-            <th className="px-6 py-3 text-sm font-semibold text-gray-300">Delete</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.length === 0 ? (
-            <tr className="border-t border-gray-700">
-              <td colSpan="6" className="px-6 py-4 text-center text-gray-400">
-                No products found.
-              </td>
+    <div className="bg-gray-800 rounded-lg shadow overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-700">
+          <thead className="bg-gray-700">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                Product
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                Category
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                Price
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                Stock
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                Rating
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                Actions
+              </th>
             </tr>
-          ) : (
-            products.map((product) => (
-              <tr key={product._id} className="border-t border-gray-700">
-                <td className="px-6 py-4">{product.name}</td>
-                {/* Access populated category/subcategory names */}
-                <td className="px-6 py-4">{product.proCategoryId?.name || 'N/A'}</td>
-                <td className="px-6 py-4">{product.proSubCategoryId?.name || 'N/A'}</td>
-                <td className="px-6 py-4 text-white">${product.price}</td>
-                <td className="px-6 py-4">
-                  <AddProductDialog
-                    onAddProduct={() => {}} // Not used when editing
-                    onEditProduct={(id, payload) => onEditProduct(id, payload)}
-                    initialData={product}
-                    categories={categories}
-                    subcategories={subcategories}
-                    // Pass all other necessary props for the dialog's dropdowns
-                    brands={[]} // You need to pass real brand data here
-                    variantTypes={[]} // You need to pass real variant type data here
-                    variants={[]} // You need to pass real variant data here
-                    setEditingProduct={onSetEditingProduct}
-                  >
-                    <AlertDialogTrigger asChild>
-                      <button onClick={() => onSetEditingProduct(product)} className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white">
-                        <Edit className="h-4 w-4" />
-                      </button>
-                    </AlertDialogTrigger>
-                  </AddProductDialog>
-                </td>
-                <td className="px-6 py-4">
-                  <button onClick={() => onDeleteProduct(product._id)} className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white">
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+          </thead>
+          <tbody className="bg-gray-800 divide-y divide-gray-700">
+            {products.length === 0 ? (
+              <tr>
+                <td colSpan="6" className="text-center py-12">
+                  <Package className="mx-auto h-12 w-12 text-gray-400" />
+                  <h3 className="mt-2 text-sm font-medium text-white">No products</h3>
+                  <p className="mt-1 text-sm text-gray-400">
+                    Get started by creating a new product.
+                  </p>
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              products.map((product) => (
+                <tr key={product._id} className="hover:bg-gray-700">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 h-12 w-12 relative group">
+                        {product.images && product.images.length > 0 ? (
+                          <>
+                            <img
+                              src={product.images[0].url || product.images[0]}
+                              alt={product.name}
+                              className="h-12 w-12 rounded-lg object-cover border border-gray-600 cursor-pointer transition-transform duration-200 group-hover:scale-105"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.nextSibling.style.display = 'flex';
+                              }}
+                            />
+                            {/* Hover Preview */}
+                            <div className="absolute left-16 top-0 z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                              <div className="bg-gray-900 border border-gray-600 rounded-lg p-2 shadow-2xl">
+                                <img
+                                  src={product.images[0].url || product.images[0]}
+                                  alt={product.name}
+                                  className="h-32 w-32 rounded-lg object-cover"
+                                />
+                                <div className="mt-2 text-xs text-gray-300 text-center max-w-32 truncate">
+                                  {product.name}
+                                </div>
+                                {product.images.length > 1 && (
+                                  <div className="text-xs text-blue-400 text-center">
+                                    +{product.images.length - 1} more
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </>
+                        ) : null}
+                        <div
+                          className={`h-12 w-12 rounded-lg bg-gray-600 flex items-center justify-center ${product.images && product.images.length > 0 ? 'hidden' : ''}`}
+                        >
+                          <Package className="h-6 w-6 text-gray-400" />
+                        </div>
+                      </div>
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-white">
+                          {product.name}
+                        </div>
+                        <div className="text-sm text-gray-400">
+                          ID: {product._id.slice(-6)}
+                        </div>
+                        {product.images && product.images.length > 1 && (
+                          <div className="text-xs text-blue-400">
+                            +{product.images.length - 1} more images
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-white">
+                      {product.proCategoryId?.name || 'N/A'}
+                    </div>
+                    <div className="text-sm text-gray-400">
+                      {product.proSubCategoryId?.name || 'N/A'}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-white">
+                      Rs. {product.price}
+                    </div>
+                    {product.offerPrice && (
+                      <div className="text-sm text-green-400">
+                        Offer: Rs. {product.offerPrice}
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${(product.stock || 0) > 10
+                      ? 'bg-green-100 text-green-800'
+                      : (product.stock || 0) > 0
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-red-100 text-red-800'
+                      }`}>
+                      {product.stock || 0} units
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <Star className="h-4 w-4 text-yellow-400 mr-1" />
+                      <span className="text-sm text-white">
+                        {product.rating?.averageRating?.toFixed(1) || '0.0'}
+                      </span>
+                      <span className="text-xs text-gray-400 ml-1">
+                        ({product.rating?.totalReviews || 0})
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex space-x-2">
+                      <AddProductDialog
+                        onAddProduct={() => { }} // Not used when editing
+                        onEditProduct={onEditProduct}
+                        initialData={product}
+                        categories={categories}
+                        subcategories={subcategories}
+                        brands={brands}
+                        variantTypes={variantTypes}
+                        variants={variants}
+                        setEditingProduct={onSetEditingProduct}
+                      >
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(product)}
+                            className="text-blue-400 hover:text-blue-300"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                      </AddProductDialog>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onDeleteProduct(product._id)}
+                        className="text-red-400 hover:text-red-300"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

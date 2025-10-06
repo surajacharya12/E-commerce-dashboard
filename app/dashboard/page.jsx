@@ -5,6 +5,7 @@ import TopBar from "./components/TopBar";
 import ProductControls from "./components/ProductControls";
 import ProductsTable from "./components/ProductTable";
 import OrderDetails from "./components/OrderDetails";
+import { toast } from "sonner";
 import url from "../http/page";
 
 export default function Dashboard() {
@@ -15,139 +16,208 @@ export default function Dashboard() {
   const [brands, setBrands] = useState([]);
   const [variantTypes, setVariantTypes] = useState([]);
   const [variants, setVariants] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingProduct, setEditingProduct] = useState(null);
   const [filters, setFilters] = useState({ status: "", date: "" });
 
-  // ✅ Fetch all data from backend
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [
-          prodRes,
-          orderRes,
-          catRes,
-          subRes,
-          brandRes,
-          vtypeRes,
-          varRes,
-        ] = await Promise.all([
-          fetch(`${url}products`).then((r) => r.json()),
-          fetch(`${url}orders`).then((r) => r.json()),
-          fetch(`${url}categories`).then((r) => r.json()),
-          fetch(`${url}subCategories`).then((r) => r.json()),
-          fetch(`${url}brands`).then((r) => r.json()),
-          fetch(`${url}variantTypes`).then((r) => r.json()),
-          fetch(`${url}variants`).then((r) => r.json()),
-        ]);
-
-        setProducts(Array.isArray(prodRes?.data) ? prodRes.data : prodRes || []);
-        setOrders(Array.isArray(orderRes?.data) ? orderRes.data : orderRes || []);
-        setCategories(Array.isArray(catRes?.data) ? catRes.data : catRes || []);
-        setSubcategories(Array.isArray(subRes?.data) ? subRes.data : subRes || []);
-        setBrands(Array.isArray(brandRes?.data) ? brandRes.data : brandRes || []);
-        setVariantTypes(Array.isArray(vtypeRes?.data) ? vtypeRes.data : vtypeRes || []);
-        setVariants(Array.isArray(varRes?.data) ? varRes.data : varRes || []);
-      } catch (err) {
-        console.error("Error fetching data:", err);
-      }
-    };
-
-    fetchData();
+    fetchAllData();
   }, []);
 
-  // ✅ Add product
-  const handleAddProduct = async (payload) => {
+  const fetchAllData = async () => {
     try {
-      const res = await fetch(`${url}products`, {
+      await Promise.all([
+        fetchProducts(),
+        fetchOrders(),
+        fetchCategories(),
+        fetchSubCategories(),
+        fetchBrands(),
+        fetchVariantTypes(),
+        fetchVariants(),
+      ]);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      toast.error("Failed to fetch data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch(`${url}products`);
+      const result = await response.json();
+      if (result.success) {
+        setProducts(result.data);
+      } else {
+        toast.error(result.message || "Failed to fetch products");
+      }
+    } catch (error) {
+      console.error('Fetch products error:', error);
+      toast.error("Failed to fetch products: " + error.message);
+    }
+  };
+
+  const fetchOrders = async () => {
+    try {
+      const response = await fetch(`${url}orders`);
+      const result = await response.json();
+      setOrders(Array.isArray(result?.data) ? result.data : result || []);
+    } catch (error) {
+      console.error("Failed to fetch orders:", error);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(`${url}categories`);
+      const result = await response.json();
+      if (result.success) {
+        setCategories(result.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch categories:", error);
+    }
+  };
+
+  const fetchSubCategories = async () => {
+    try {
+      const response = await fetch(`${url}subCategories`);
+      const result = await response.json();
+      if (result.success) {
+        setSubcategories(result.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch subcategories:", error);
+    }
+  };
+
+  const fetchBrands = async () => {
+    try {
+      const response = await fetch(`${url}brands`);
+      const result = await response.json();
+      if (result.success) {
+        setBrands(result.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch brands:", error);
+    }
+  };
+
+  const fetchVariantTypes = async () => {
+    try {
+      const response = await fetch(`${url}variantTypes`);
+      const result = await response.json();
+      if (result.success) {
+        setVariantTypes(result.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch variant types:", error);
+    }
+  };
+
+  const fetchVariants = async () => {
+    try {
+      const response = await fetch(`${url}variants`);
+      const result = await response.json();
+      if (result.success) {
+        setVariants(result.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch variants:", error);
+    }
+  };
+
+  const handleAddProduct = async (formData) => {
+    try {
+      const response = await fetch(`${url}products`, {
         method: "POST",
-        body: payload, // Pass FormData directly
+        body: formData, // FormData is passed directly
       });
 
-      const saved = await res.json();
+      const result = await response.json();
 
-      if (res.ok) {
-        setProducts((prev) => [...prev, saved.data || saved]);
+      if (result.success) {
+        toast.success("Product created successfully");
+        fetchProducts();
         setEditingProduct(null);
       } else {
-        throw new Error(saved.message || "Failed to add product");
+        toast.error(result.message || "Failed to add product");
       }
-    } catch (err) {
-      console.error("Error adding product:", err);
-      throw err;
+    } catch (error) {
+      console.error('Add product error:', error);
+      toast.error("An error occurred: " + error.message);
     }
   };
 
-  // ✅ Edit product
-  const handleEditProduct = async (id, payload) => {
+  const handleEditProduct = async (id, formData) => {
     try {
-      const res = await fetch(`${url}products/${id}`, {
-        method: "PATCH",
-        body: payload, // Pass FormData directly
+      const response = await fetch(`${url}products/${id}`, {
+        method: "PUT",
+        body: formData, // FormData is passed directly
       });
 
-      const updated = await res.json();
+      const result = await response.json();
 
-      if (res.ok) {
-        const updatedProductData = updated.data || updated;
-
-        setProducts((prev) =>
-          prev.map((p) =>
-            p.id === (updatedProductData.id || updatedProductData._id) ||
-            p._id === (updatedProductData.id || updatedProductData._id)
-              ? updatedProductData
-              : p
-          )
-        );
-
+      if (result.success) {
+        toast.success("Product updated successfully");
+        fetchProducts();
         setEditingProduct(null);
       } else {
-        throw new Error(updated.message || "Failed to update product");
+        toast.error(result.message || "Failed to update product");
       }
-    } catch (err) {
-      console.error("Error updating product:", err);
-      throw err;
+    } catch (error) {
+      console.error('Edit product error:', error);
+      toast.error("An error occurred: " + error.message);
     }
   };
 
-  // ✅ Delete product
   const handleDeleteProduct = async (id) => {
+    if (!confirm("Are you sure you want to delete this product?")) return;
+
     try {
-      await fetch(`${url}products/${id}`, { method: "DELETE" });
-      setProducts((prev) => prev.filter((p) => (p.id || p._id) !== id));
-    } catch (err) {
-      console.error("Error deleting product:", err);
+      const response = await fetch(`${url}products/${id}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success("Product deleted successfully");
+        fetchProducts();
+      } else {
+        toast.error(result.message || "Delete failed");
+      }
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast.error("An error occurred: " + error.message);
     }
   };
 
-  // ✅ Refresh products
-  const handleRefreshProducts = async () => {
-    try {
-      const prodRes = await fetch(`${url}products`).then((r) => r.json());
-      setProducts(Array.isArray(prodRes?.data) ? prodRes.data : prodRes || []);
-      setEditingProduct(null);
-    } catch (err) {
-      console.error("Error refreshing products:", err);
-    }
-  };
-
-  // ✅ Filtered products
   const filteredProducts = products.filter((p) =>
     p.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const productCounts = {
     all: products.length,
-    outOfStock: products.filter((p) => p.quantity === 0).length,
-    limitedStock: products.filter((p) => p.quantity > 0 && p.quantity < 10).length,
-    otherStock: products.filter((p) => p.quantity >= 10).length,
+    outOfStock: products.filter((p) => (p.stock || p.quantity || 0) === 0).length,
+    limitedStock: products.filter((p) => (p.stock || p.quantity || 0) > 0 && (p.stock || p.quantity || 0) < 10).length,
+    otherStock: products.filter((p) => (p.stock || p.quantity || 0) >= 10).length,
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-[#111827] text-white">
       {/* Main Content Area */}
       <main className="flex-1 p-8 pr-96">
-        {/* Increased right padding to prevent content from going under the fixed OrderDetails sidebar */}
         <TopBar
           pageTitle="Admin Dashboard"
           searchTerm={searchTerm}
@@ -158,7 +228,7 @@ export default function Dashboard() {
 
         <ProductControls
           productCounts={productCounts}
-          onRefresh={handleRefreshProducts}
+          onRefresh={fetchProducts}
           onAddProduct={handleAddProduct}
           onEditProduct={handleEditProduct}
           editingProduct={editingProduct}
@@ -177,6 +247,9 @@ export default function Dashboard() {
           onSetEditingProduct={setEditingProduct}
           categories={categories}
           subcategories={subcategories}
+          brands={brands}
+          variantTypes={variantTypes}
+          variants={variants}
         />
       </main>
 
