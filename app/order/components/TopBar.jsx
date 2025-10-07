@@ -11,7 +11,7 @@ const TopBar = ({ orderCount, searchTerm, setSearchTerm }) => {
         <div className="relative">
           <input
             type="text"
-            placeholder="Search orders..."
+            placeholder="Search by order number or customer..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-72 rounded-lg border border-gray-700 bg-[#2a2f45] text-white px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500"

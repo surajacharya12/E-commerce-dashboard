@@ -19,7 +19,9 @@ export default function Order() {
       console.log("API Response:", data); // 👀 see what backend returns
 
       // ✅ Normalize: always set an array
-      if (Array.isArray(data)) {
+      if (data.success && Array.isArray(data.data)) {
+        setOrders(data.data);
+      } else if (Array.isArray(data)) {
         setOrders(data);
       } else if (Array.isArray(data.orders)) {
         setOrders(data.orders);
@@ -45,19 +47,30 @@ export default function Order() {
   const handleDelete = async (id) => {
     try {
       await fetch(`${url}orders/${id}`, { method: "DELETE" });
-      setOrders((prev) => prev.filter((order) => order.id !== id));
+      setOrders((prev) => prev.filter((order) => order._id !== id));
     } catch (error) {
       console.error("Error deleting order:", error);
     }
   };
 
   const filteredOrders = orders.filter((order) => {
-    const matchesSearch = order.customerName
-      ?.toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "Status" || order.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    // Use userID.name if populated, otherwise fallback to email or default
+    const customerName = order.userID?.name || order.userID?.email || "Unknown Customer";
+    // Order number may be present or derived from _id
+    const orderNumber = (order.orderNumber || order._id?.slice(-8).toUpperCase() || "").toString();
+
+    // If searchTerm is empty, match everything
+    if (!searchTerm || searchTerm.trim() === "") {
+      const matchesStatus = statusFilter === "Status" || order.orderStatus === statusFilter.toLowerCase();
+      return matchesStatus;
+    }
+
+    const lowerSearch = searchTerm.toLowerCase();
+    const matchesCustomer = customerName.toLowerCase().includes(lowerSearch);
+    const matchesOrderNumber = orderNumber.toLowerCase().includes(lowerSearch);
+    const matchesStatus = statusFilter === "Status" || order.orderStatus === statusFilter.toLowerCase();
+
+    return (matchesCustomer || matchesOrderNumber) && matchesStatus;
   });
 
   return (

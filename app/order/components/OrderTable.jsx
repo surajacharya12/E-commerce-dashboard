@@ -1,6 +1,10 @@
 "use client";
 
-import { Trash2, RefreshCw } from "lucide-react";
+import { Trash2, RefreshCw, Receipt, Eye } from "lucide-react";
+import Link from "next/link";
+import url from "../../http/page";
+import { useState } from "react";
+import Toast from "./Toast";
 
 const OrderTable = ({
   orders,
@@ -9,6 +13,44 @@ const OrderTable = ({
   statusFilter,
   setStatusFilter,
 }) => {
+  const [updatingStatus, setUpdatingStatus] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  const handleStatusChange = async (orderId, newStatus) => {
+    setUpdatingStatus(orderId);
+    try {
+      const response = await fetch(`${url}orders/${orderId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ orderStatus: newStatus }),
+      });
+
+      if (response.ok) {
+        // Refresh the orders list to show updated status
+        handleRefresh();
+        setToast({
+          message: `Order status updated to ${newStatus}`,
+          type: 'success'
+        });
+      } else {
+        const errorData = await response.json();
+        setToast({
+          message: `Failed to update order status: ${errorData.message || 'Unknown error'}`,
+          type: 'error'
+        });
+      }
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      setToast({
+        message: 'Error updating order status. Please try again.',
+        type: 'error'
+      });
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
   return (
     <div>
       {/* Header */}
@@ -27,11 +69,11 @@ const OrderTable = ({
             className="border border-gray-700 bg-[#2a2f45] text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option>Status</option>
-            <option>Processing</option>
-            <option>Shipped</option>
-            <option>Pending</option>
-            <option>Delivered</option>
-            <option>Cancelled</option>
+            <option>processing</option>
+            <option>shipped</option>
+            <option>pending</option>
+            <option>delivered</option>
+            <option>cancelled</option>
           </select>
         </div>
       </div>
@@ -42,6 +84,9 @@ const OrderTable = ({
           <thead className="bg-[#1e2235]">
             <tr>
               <th className="px-12 py-6 text-sm font-semibold text-gray-300">
+                Order Number
+              </th>
+              <th className="px-12 py-3 text-sm font-semibold text-gray-300">
                 Customer Name
               </th>
               <th className="px-12 py-3 text-sm font-semibold text-gray-300">
@@ -57,7 +102,7 @@ const OrderTable = ({
                 Date
               </th>
               <th className="px-6 py-3 text-sm font-semibold text-gray-300">
-                Delete
+                Actions
               </th>
             </tr>
           </thead>
@@ -65,7 +110,7 @@ const OrderTable = ({
             {orders.length === 0 ? (
               <tr className="border-t border-gray-700">
                 <td
-                  colSpan="6"
+                  colSpan="7"
                   className="px-12 py-4 text-center text-gray-400"
                 >
                   No orders found.
@@ -73,19 +118,69 @@ const OrderTable = ({
               </tr>
             ) : (
               orders.map((order) => (
-                <tr key={order.id} className="border-t border-gray-700">
-                  <td className="px-12 py-4">{order.customerName}</td>
-                  <td className="px-12 py-4">Rs. {order.orderAmount.toFixed(2)}</td>
-                  <td className="px-12 py-4">{order.payment}</td>
-                  <td className="px-12 py-4">{order.status}</td>
-                  <td className="px-12 py-4">{order.date}</td>
+                <tr key={order._id} className="border-t border-gray-700">
+                  <td className="px-12 py-4 font-mono text-sm">
+                    {order.orderNumber || order._id.slice(-8).toUpperCase()}
+                  </td>
+                  <td className="px-12 py-4">
+                    {order.userID?.name || order.userID?.email || "Unknown Customer"}
+                  </td>
+                  <td className="px-12 py-4">Rs. {order.totalPrice?.toFixed(2) || "0.00"}</td>
+                  <td className="px-12 py-4 capitalize">
+                    {order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'}
+                  </td>
+                  <td className="px-12 py-4">
+                    <div className="flex flex-col">
+                      <select
+                        value={order.orderStatus}
+                        onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                        disabled={updatingStatus === order._id}
+                        className={`px-3 py-1 rounded-full text-xs font-semibold border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${order.orderStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          order.orderStatus === 'processing' ? 'bg-blue-100 text-blue-800' :
+                            order.orderStatus === 'shipped' ? 'bg-purple-100 text-purple-800' :
+                              order.orderStatus === 'delivered' ? 'bg-green-100 text-green-800' :
+                                order.orderStatus === 'cancelled' ? 'bg-red-100 text-red-800' :
+                                  'bg-gray-100 text-gray-800'
+                          }`}
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                      {updatingStatus === order._id && (
+                        <div className="text-xs text-gray-400 mt-1">Updating...</div>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-12 py-4">
+                    {new Date(order.orderDate).toLocaleDateString()}
+                  </td>
                   <td className="px-6 py-4">
-                    <button
-                      onClick={() => handleDelete(order.id)}
-                      className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <div className="flex gap-1">
+                      <Link
+                        href={`/order-slip/${order._id}`}
+                        className="p-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white"
+                        title="View Order Slip"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Link>
+                      <Link
+                        href={`/receipt/${order._id}`}
+                        className="p-2 rounded-lg bg-green-600 hover:bg-green-700 text-white"
+                        title="View Receipt"
+                      >
+                        <Receipt className="h-4 w-4" />
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(order._id)}
+                        className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white"
+                        title="Delete Order"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -93,6 +188,13 @@ const OrderTable = ({
           </tbody>
         </table>
       </div>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 };
