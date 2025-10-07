@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import TopBar from "./components/TopBar";
-import CategoryTable from "./components/CategoryTable";
+import CategoryTable from "./components/categoryTable";
 import url from "../http/page";
 import { Grid3X3 } from "lucide-react";
 import ProtectedLayout from "../components/ProtectedLayout";

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import TopBar from "./components/TopBar";
-import StoreTable from "./components/StoreTable";
+import StoreTable from "./components/storeTable";
 import url from "../http/page";
 import { Store as StoreIcon } from "lucide-react";
 
