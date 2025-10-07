@@ -14,30 +14,62 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     checkAuth();
+
+    // Clear session on page unload/refresh
+    const handleBeforeUnload = () => {
+      localStorage.removeItem("dashboardAuth");
+      localStorage.removeItem("dashboardUser");
+      localStorage.removeItem("dashboardLoginTime");
+    };
+
+    // Clear session on visibility change (tab switch, minimize, etc.)
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        localStorage.removeItem("dashboardAuth");
+        localStorage.removeItem("dashboardUser");
+        localStorage.removeItem("dashboardLoginTime");
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, []);
 
   const checkAuth = () => {
     try {
-      // Always clear any existing session data on page load
+      // Always require fresh login - no session persistence
+      // Clear any existing localStorage data on page load
       localStorage.removeItem("dashboardAuth");
       localStorage.removeItem("dashboardUser");
       localStorage.removeItem("dashboardLoginTime");
 
-      // Always start as unauthenticated - require fresh login every time
       setIsAuthenticated(false);
       setUser(null);
+      console.log("🔒 Fresh login required - no session persistence");
     } catch (error) {
       console.error("Auth check error:", error);
+      setIsAuthenticated(false);
+      setUser(null);
     } finally {
       setLoading(false);
     }
   };
 
   const login = (username) => {
-    // Set authentication state only in memory (no localStorage persistence)
+    // Set authentication state in memory only (no localStorage persistence)
     setIsAuthenticated(true);
     setUser(username);
-    console.log("✅ User logged in:", username, "- Session will not persist");
+
+    console.log(
+      "✅ User logged in:",
+      username,
+      "- Session will not persist across page refreshes"
+    );
   };
 
   const logout = () => {

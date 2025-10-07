@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import TopBar from "./components/TopBar";
 import OrderTable from "./components/OrderTable";
 import url from "../http/page"; // import backend url
+import ProtectedLayout from "../components/ProtectedLayout";
 
 export default function Order() {
   const [orders, setOrders] = useState([]);
@@ -60,21 +61,23 @@ export default function Order() {
   });
 
   return (
-    <div className="flex min-h-screen bg-[#111827] text-white">
-      <main className="flex-1 flex flex-col md:p-10 gap-10 overflow-y-auto">
-        <TopBar
-          orderCount={filteredOrders.length}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-        />
-        <OrderTable
-          orders={filteredOrders}
-          handleRefresh={handleRefresh}
-          handleDelete={handleDelete}
-          statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-        />
-      </main>
-    </div>
+    <ProtectedLayout>
+      <div className="flex min-h-screen bg-[#111827] text-white">
+        <main className="flex-1 flex flex-col md:p-10 gap-10 overflow-y-auto">
+          <TopBar
+            orderCount={filteredOrders.length}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+          />
+          <OrderTable
+            orders={filteredOrders}
+            handleRefresh={handleRefresh}
+            handleDelete={handleDelete}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+          />
+        </main>
+      </div>
+    </ProtectedLayout>
   );
 }

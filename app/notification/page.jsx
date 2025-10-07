@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import TopBar from "./components/TopBar";
 import NotificationTable from "./components/notificationTable";
+import ProtectedLayout from "../components/ProtectedLayout";
 import url from "../http/page"; // ✅ API base URL
 
 export default function Notification() {
@@ -62,17 +63,19 @@ export default function Notification() {
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-[#111827] text-white">
-      <main className="flex-1 flex flex-col md:p-10 gap-10 overflow-y-auto">
-        <TopBar total={notifications.length} />
-        <NotificationTable
-          notifications={notifications}
-          isLoading={isLoading}
-          fetchNotifications={fetchNotifications}
-          handleAction={handleAction}
-          handleDelete={handleDelete}
-        />
-      </main>
-    </div>
+    <ProtectedLayout>
+      <div className="flex min-h-screen bg-[#111827] text-white">
+        <main className="flex-1 flex flex-col md:p-10 gap-10 overflow-y-auto">
+          <TopBar total={notifications.length} />
+          <NotificationTable
+            notifications={notifications}
+            isLoading={isLoading}
+            fetchNotifications={fetchNotifications}
+            handleAction={handleAction}
+            handleDelete={handleDelete}
+          />
+        </main>
+      </div>
+    </ProtectedLayout>
   );
 }

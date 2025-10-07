@@ -6,6 +6,7 @@ import SubCategoryTable from "./components/SubCategoryTable";
 import url from "../http/page";
 import { Layers } from "lucide-react";
 
+import ProtectedLayout from "../components/ProtectedLayout";
 const API_URL = url + "subCategories";
 
 export default function SubCategory() {
@@ -36,7 +37,7 @@ export default function SubCategory() {
       const response = await fetch(API_URL, {
         method: 'POST',
         // DO NOT set 'Content-Type': 'application/json' when sending FormData
-        body: formData, 
+        body: formData,
       });
       if (!response.ok) {
         const errorData = await response.json();
@@ -95,26 +96,28 @@ export default function SubCategory() {
   );
 
   return (
-    <div className="flex min-h-screen bg-[#111827] text-white">
-      <main className="flex-1 flex flex-col md:p-10 gap-10 overflow-y-auto">
-        <TopBar
-          pageTitle="Sub-category"
-          itemCount={subCategories.length}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          icon={Layers}
-        />
-        <SubCategoryTable
-          subCategories={filteredSubCategories}
-          onAddSubCategory={handleAddSubCategory}
-          onEditSubCategory={handleEditSubCategory}
-          onDeleteSubCategory={handleDeleteSubCategory}
-          handleRefresh={handleRefresh}
-          editingSubCategory={editingSubCategory}
-          setEditingSubCategory={setEditingSubCategory}
-        />
-      </main>
-    </div>
+    <ProtectedLayout>
+      <div className="flex min-h-screen bg-[#111827] text-white">
+        <main className="flex-1 flex flex-col md:p-10 gap-10 overflow-y-auto">
+          <TopBar
+            pageTitle="Sub-category"
+            itemCount={subCategories.length}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            icon={Layers}
+          />
+          <SubCategoryTable
+            subCategories={filteredSubCategories}
+            onAddSubCategory={handleAddSubCategory}
+            onEditSubCategory={handleEditSubCategory}
+            onDeleteSubCategory={handleDeleteSubCategory}
+            handleRefresh={handleRefresh}
+            editingSubCategory={editingSubCategory}
+            setEditingSubCategory={setEditingSubCategory}
+          />
+        </main>
+      </div>
+    </ProtectedLayout>
   );
 }
 

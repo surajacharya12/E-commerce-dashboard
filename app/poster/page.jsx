@@ -6,6 +6,7 @@ import PosterTable from "./components/PosterTable";
 import url from "../http/page";
 import { toast } from "sonner";
 
+import ProtectedLayout from "../components/ProtectedLayout";
 export default function Poster() {
   const [posters, setPosters] = useState([]);
   const [editingPoster, setEditingPoster] = useState(null);
@@ -14,7 +15,7 @@ export default function Poster() {
     try {
       const res = await fetch(`${url}posters`);
       const data = await res.json();
-      
+
       if (data.success && Array.isArray(data.data)) {
         setPosters(data.data);
       } else {
@@ -104,19 +105,21 @@ export default function Poster() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#111827] text-white">
-      <main className="flex-1 flex flex-col md:p-10 gap-10 overflow-y-auto">
-        <TopBar posterCount={posters.length} />
-        <PosterTable
-          posters={posters}
-          onAddPoster={handleAddPoster}
-          onEditPoster={handleEditPoster}
-          onDeletePoster={handleDeletePoster}
-          onRefresh={fetchPosters}
-          editingPoster={editingPoster}
-          setEditingPoster={setEditingPoster}
-        />
-      </main>
-    </div>
+    <ProtectedLayout>
+      <div className="flex min-h-screen bg-[#111827] text-white">
+        <main className="flex-1 flex flex-col md:p-10 gap-10 overflow-y-auto">
+          <TopBar posterCount={posters.length} />
+          <PosterTable
+            posters={posters}
+            onAddPoster={handleAddPoster}
+            onEditPoster={handleEditPoster}
+            onDeletePoster={handleDeletePoster}
+            onRefresh={fetchPosters}
+            editingPoster={editingPoster}
+            setEditingPoster={setEditingPoster}
+          />
+        </main>
+      </div>
+    </ProtectedLayout>
   );
 }

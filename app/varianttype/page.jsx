@@ -5,6 +5,7 @@ import TopBar from "./components/TopBar";
 import VariantTypeTable from "./components/VariantTypeTable";
 import url from '../http/page';
 
+import ProtectedLayout from "../components/ProtectedLayout";
 export default function VariantType() {
   const [variantTypes, setVariantTypes] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -34,21 +35,23 @@ export default function VariantType() {
   );
 
   return (
-    <div className="flex min-h-screen bg-[#111827] text-white">
-      <main className="flex-1 flex flex-col md:p-10 gap-10 overflow-y-auto">
-        <TopBar
-          itemCount={variantTypes.length}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          pageTitle="Variant Type"
-        />
-        <VariantTypeTable
-          variantTypes={filteredVariants}
-          fetchVariantTypes={fetchVariantTypes}
-          editingVariant={editingVariant}
-          setEditingVariant={setEditingVariant}
-        />
-      </main>
-    </div>
+    <ProtectedLayout>
+      <div className="flex min-h-screen bg-[#111827] text-white">
+        <main className="flex-1 flex flex-col md:p-10 gap-10 overflow-y-auto">
+          <TopBar
+            itemCount={variantTypes.length}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            pageTitle="Variant Type"
+          />
+          <VariantTypeTable
+            variantTypes={filteredVariants}
+            fetchVariantTypes={fetchVariantTypes}
+            editingVariant={editingVariant}
+            setEditingVariant={setEditingVariant}
+          />
+        </main>
+      </div>
+    </ProtectedLayout>
   );
 }

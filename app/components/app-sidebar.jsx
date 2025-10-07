@@ -2,8 +2,9 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useState, useEffect } from "react"
 import {
-  Grid, Tag, Layers, Box, Package, Repeat, Type, ShoppingCart, Gift, Percent, Image, Bell, MapPin, LogOut, User, Clock
+  Grid, Tag, Layers, Box, MessagesSquare, Repeat, Type, ShoppingCart, Gift, Percent, Image, Bell, MapPin, LogOut, User, Clock
 } from "lucide-react"
 import { useAuth } from "../../hooks/useAuth"
 
@@ -28,6 +29,7 @@ const items = [
   { title: "Variant Type", url: "/varianttype", icon: Type },
   { title: "Order", url: "/order", icon: ShoppingCart },
   { title: "Coupon", url: "/coupon", icon: Gift },
+  { title: "Customer Chats", url: "/chats", icon: MessagesSquare },
   { title: "Discount", url: "/discount", icon: Percent },
   { title: "Poster", url: "/poster", icon: Image },
   { title: "Notification", url: "/notification", icon: Bell },
@@ -37,6 +39,56 @@ const items = [
 export function AppSidebar() {
   const pathname = usePathname()
   const { user, logout } = useAuth()
+  const [chatStats, setChatStats] = useState({
+    activeChats: 0,
+    unreadChats: 0
+  })
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
+
+  // Fetch chat statistics
+  const fetchChatStats = async () => {
+    try {
+      const response = await fetch(`${API_URL}/chats/admin/all?page=1&limit=100&status=all`)
+      const result = await response.json()
+
+      if (result.success) {
+        let activeChats = 0
+        let unreadChats = 0
+
+        result.data.forEach((customer) => {
+          customer.chats.forEach((chat) => {
+            // Count active chats
+            if (chat.status === 'active') {
+              activeChats++
+            }
+
+            // Count chats with unread messages
+            if (chat.unreadCount?.admin > 0) {
+              unreadChats++
+            }
+          })
+        })
+
+        setChatStats({
+          activeChats,
+          unreadChats
+        })
+      }
+    } catch (error) {
+      console.error("Error fetching chat stats:", error)
+    }
+  }
+
+  // Fetch chat stats on component mount and set up polling
+  useEffect(() => {
+    fetchChatStats()
+
+    // Poll for updates every 30 seconds
+    const interval = setInterval(fetchChatStats, 30000)
+
+    return () => clearInterval(interval)
+  }, [])
 
   const handleLogout = () => {
     logout()
@@ -58,18 +110,40 @@ export function AppSidebar() {
             <SidebarMenu>
               {items.map((item) => {
                 const isActive = pathname === item.url || pathname.startsWith(item.url + "/")
+                const isCustomerChats = item.title === "Customer Chats"
+
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
                       <Link
                         href={item.url}
-                        className={`flex items-center gap-2 px-4 py-2 rounded ${isActive
+                        className={`flex items-center justify-between gap-2 px-4 py-2 rounded ${isActive
                           ? "bg-blue-500 text-white font-semibold"
                           : "hover:bg-gray-100"
                           }`}
                       >
-                        <item.icon />
-                        <span>{item.title}</span>
+                        <div className="flex items-center gap-2">
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </div>
+
+                        {/* Chat Statistics for Customer Chats */}
+                        {isCustomerChats && (chatStats.activeChats > 0 || chatStats.unreadChats > 0) && (
+                          <div className="flex items-center space-x-1">
+                            {/* Active Chats Badge */}
+                            {chatStats.activeChats > 0 && (
+                              <div className="flex items-center justify-center min-w-[20px] h-5 bg-green-500 text-white text-xs font-bold rounded-full px-1.5">
+                                {chatStats.activeChats > 99 ? '99+' : chatStats.activeChats}
+                              </div>
+                            )}
+                            {/* Unread Chats Badge */}
+                            {chatStats.unreadChats > 0 && (
+                              <div className="flex items-center justify-center min-w-[20px] h-5 bg-red-500 text-white text-xs font-bold rounded-full px-1.5 animate-pulse">
+                                {chatStats.unreadChats > 99 ? '99+' : chatStats.unreadChats}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

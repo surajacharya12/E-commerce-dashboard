@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import TopBar from "./components/TopBar";
 import CouponTable from "./components/CouponTable";
+import ProtectedLayout from "../components/ProtectedLayout";
 import url from "../http/page";   // ✅ central URL file
 import { toast } from "sonner";
 
@@ -98,23 +99,25 @@ export default function Coupon() {
   );
 
   return (
-    <div className="flex min-h-screen bg-[#111827] text-white">
-      <main className="flex-1 flex flex-col md:p-10 gap-10 overflow-y-auto">
-        <TopBar
-          couponCount={coupons.length}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-        />
-        <CouponTable
-          coupons={filteredCoupons}
-          onAddCoupon={handleAddCoupon}
-          onEditCoupon={handleEditCoupon}
-          onDeleteCoupon={handleDeleteCoupon}
-          onRefresh={fetchCoupons}
-          editingCoupon={editingCoupon}
-          setEditingCoupon={setEditingCoupon}
-        />
-      </main>
-    </div>
+    <ProtectedLayout>
+      <div className="flex min-h-screen bg-[#111827] text-white">
+        <main className="flex-1 flex flex-col md:p-10 gap-10 overflow-y-auto">
+          <TopBar
+            couponCount={coupons.length}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+          />
+          <CouponTable
+            coupons={filteredCoupons}
+            onAddCoupon={handleAddCoupon}
+            onEditCoupon={handleEditCoupon}
+            onDeleteCoupon={handleDeleteCoupon}
+            onRefresh={fetchCoupons}
+            editingCoupon={editingCoupon}
+            setEditingCoupon={setEditingCoupon}
+          />
+        </main>
+      </div>
+    </ProtectedLayout>
   );
 }

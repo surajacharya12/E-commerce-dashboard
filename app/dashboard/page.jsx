@@ -7,6 +7,7 @@ import ProductsTable from "./components/ProductTable";
 import OrderDetails from "./components/OrderDetails";
 import { toast } from "sonner";
 import url from "../http/page";
+import ProtectedLayout from "../components/ProtectedLayout";
 
 export default function Dashboard() {
   const [products, setProducts] = useState([]);
@@ -215,46 +216,48 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#111827] text-white">
-      {/* Main Content Area */}
-      <main className="flex-1 p-8 pr-96">
-        <TopBar
-          pageTitle="Admin Dashboard"
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          filters={filters}
-          setFilters={setFilters}
-        />
+    <ProtectedLayout>
+      <div className="flex min-h-screen bg-[#111827] text-white">
+        {/* Main Content Area */}
+        <main className="flex-1 p-8 pr-96">
+          <TopBar
+            pageTitle="Admin Dashboard"
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            filters={filters}
+            setFilters={setFilters}
+          />
 
-        <ProductControls
-          productCounts={productCounts}
-          onRefresh={fetchProducts}
-          onAddProduct={handleAddProduct}
-          onEditProduct={handleEditProduct}
-          editingProduct={editingProduct}
-          setEditingProduct={setEditingProduct}
-          categories={categories}
-          subcategories={subcategories}
-          brands={brands}
-          variantTypes={variantTypes}
-          variants={variants}
-        />
+          <ProductControls
+            productCounts={productCounts}
+            onRefresh={fetchProducts}
+            onAddProduct={handleAddProduct}
+            onEditProduct={handleEditProduct}
+            editingProduct={editingProduct}
+            setEditingProduct={setEditingProduct}
+            categories={categories}
+            subcategories={subcategories}
+            brands={brands}
+            variantTypes={variantTypes}
+            variants={variants}
+          />
 
-        <ProductsTable
-          products={filteredProducts}
-          onDeleteProduct={handleDeleteProduct}
-          onEditProduct={handleEditProduct}
-          onSetEditingProduct={setEditingProduct}
-          categories={categories}
-          subcategories={subcategories}
-          brands={brands}
-          variantTypes={variantTypes}
-          variants={variants}
-        />
-      </main>
+          <ProductsTable
+            products={filteredProducts}
+            onDeleteProduct={handleDeleteProduct}
+            onEditProduct={handleEditProduct}
+            onSetEditingProduct={setEditingProduct}
+            categories={categories}
+            subcategories={subcategories}
+            brands={brands}
+            variantTypes={variantTypes}
+            variants={variants}
+          />
+        </main>
 
-      {/* Sidebar - Order Details */}
-      <OrderDetails orders={orders} />
-    </div>
+        {/* Sidebar - Order Details */}
+        <OrderDetails orders={orders} />
+      </div>
+    </ProtectedLayout>
   );
 }

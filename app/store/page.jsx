@@ -6,6 +6,7 @@ import StoreTable from "./components/StoreTable";
 import url from "../http/page";
 import { Store as StoreIcon } from "lucide-react";
 
+import ProtectedLayout from "../components/ProtectedLayout";
 export default function Store() {
   const [stores, setStores] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -87,27 +88,29 @@ export default function Store() {
   });
 
   return (
-    <div className="flex min-h-screen bg-[#111827] text-white">
-      <main className="flex-1 flex flex-col md:p-10 gap-10 overflow-y-auto">
-        <TopBar
-          pageTitle="Store"
-          itemCount={filteredStores.length}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          icon={StoreIcon}
-        />
-        <StoreTable
-          stores={filteredStores}
-          setStores={setStores}
-          editingStore={editingStore}
-          setEditingStore={setEditingStore}
-          fetchStores={fetchStores}
-          onAddStore={handleAddStore}
-          onEditStore={handleEditStore}
-          isDialogOpen={isDialogOpen}
-          setIsDialogOpen={setIsDialogOpen}
-        />
-      </main>
-    </div>
+    <ProtectedLayout>
+      <div className="flex min-h-screen bg-[#111827] text-white">
+        <main className="flex-1 flex flex-col md:p-10 gap-10 overflow-y-auto">
+          <TopBar
+            pageTitle="Store"
+            itemCount={filteredStores.length}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            icon={StoreIcon}
+          />
+          <StoreTable
+            stores={filteredStores}
+            setStores={setStores}
+            editingStore={editingStore}
+            setEditingStore={setEditingStore}
+            fetchStores={fetchStores}
+            onAddStore={handleAddStore}
+            onEditStore={handleEditStore}
+            isDialogOpen={isDialogOpen}
+            setIsDialogOpen={setIsDialogOpen}
+          />
+        </main>
+      </div>
+    </ProtectedLayout>
   );
 }

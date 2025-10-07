@@ -5,6 +5,7 @@ import TopBar from "./components/TopBar";
 import CategoryTable from "./components/CategoryTable";
 import url from "../http/page";
 import { Grid3X3 } from "lucide-react";
+import ProtectedLayout from "../components/ProtectedLayout";
 
 const API_URL = url + "categories";
 
@@ -97,25 +98,27 @@ export default function Category() {
   );
 
   return (
-    <div className="flex min-h-screen bg-[#111827] text-white">
-      <main className="flex-1 flex flex-col md:p-10 gap-10 overflow-y-auto">
-        <TopBar
-          pageTitle="Category"
-          itemCount={categories.length}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          icon={Grid3X3}
-        />
-        <CategoryTable
-          categories={filteredCategories}
-          onAddCategory={handleAddCategory}
-          onEditCategory={handleEditCategory}
-          onDeleteCategory={handleDeleteCategory}
-          handleRefresh={handleRefresh}
-          editingCategory={editingCategory}
-          setEditingCategory={setEditingCategory}
-        />
-      </main>
-    </div>
+    <ProtectedLayout>
+      <div className="flex min-h-screen bg-[#111827] text-white">
+        <main className="flex-1 flex flex-col md:p-10 gap-10 overflow-y-auto">
+          <TopBar
+            pageTitle="Category"
+            itemCount={categories.length}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            icon={Grid3X3}
+          />
+          <CategoryTable
+            categories={filteredCategories}
+            onAddCategory={handleAddCategory}
+            onEditCategory={handleEditCategory}
+            onDeleteCategory={handleDeleteCategory}
+            handleRefresh={handleRefresh}
+            editingCategory={editingCategory}
+            setEditingCategory={setEditingCategory}
+          />
+        </main>
+      </div>
+    </ProtectedLayout>
   );
 }

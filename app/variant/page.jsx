@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import TopBar from "./components/TopBar";
 import VariantTable from "./components/VariantTable";
+import ProtectedLayout from "../components/ProtectedLayout";
 import url from '../http/page'; // Assuming url.js is in the same folder
 import { usePathname } from 'next/navigation';
 
@@ -47,26 +48,28 @@ export default function Variant() {
   const filteredVariants = variants.filter(variant => {
     const variantTypeName = variant.variantTypeId?.name?.toLowerCase() || '';
     return variant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           variantTypeName.includes(searchTerm.toLowerCase());
+      variantTypeName.includes(searchTerm.toLowerCase());
   });
 
   return (
-    <div className="flex min-h-screen bg-[#111827] text-white">
-      <main className="flex-1 flex flex-col md:p-10 gap-10 overflow-y-auto">
-        <TopBar
-          pageTitle="Variant"
-          itemCount={variants.length}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-        />
-        <VariantTable
-          variants={filteredVariants}
-          variantTypes={variantTypes}
-          fetchVariants={fetchVariants}
-          editingVariant={editingVariant}
-          setEditingVariant={setEditingVariant}
-        />
-      </main>
-    </div>
+    <ProtectedLayout>
+      <div className="flex min-h-screen bg-[#111827] text-white">
+        <main className="flex-1 flex flex-col md:p-10 gap-10 overflow-y-auto">
+          <TopBar
+            pageTitle="Variant"
+            itemCount={variants.length}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+          />
+          <VariantTable
+            variants={filteredVariants}
+            variantTypes={variantTypes}
+            fetchVariants={fetchVariants}
+            editingVariant={editingVariant}
+            setEditingVariant={setEditingVariant}
+          />
+        </main>
+      </div>
+    </ProtectedLayout>
   );
 }

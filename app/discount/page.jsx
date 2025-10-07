@@ -5,6 +5,7 @@ import TopBar from "./components/TopBar";
 import DiscountTable from "./components/DiscountTable";
 import url from "../http/page";
 
+import ProtectedLayout from "../components/ProtectedLayout";
 export default function Discount() {
   const [discounts, setDiscounts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -14,7 +15,7 @@ export default function Discount() {
     try {
       const res = await fetch(`${url}discounts`);
       const data = await res.json();
-      
+
       if (data.success && Array.isArray(data.data)) {
         setDiscounts(data.data);
       } else {
@@ -108,23 +109,25 @@ export default function Discount() {
   );
 
   return (
-    <div className="flex min-h-screen bg-[#111827] text-white">
-      <main className="flex-1 flex flex-col md:p-10 gap-10 overflow-y-auto">
-        <TopBar
-          discountCount={discounts.length}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-        />
-        <DiscountTable
-          discounts={filteredDiscounts}
-          onAddDiscount={handleAddDiscount}
-          onEditDiscount={handleEditDiscount}
-          onDeleteDiscount={handleDeleteDiscount}
-          onRefresh={fetchDiscounts}
-          editingDiscount={editingDiscount}
-          setEditingDiscount={setEditingDiscount}
-        />
-      </main>
-    </div>
+    <ProtectedLayout>
+      <div className="flex min-h-screen bg-[#111827] text-white">
+        <main className="flex-1 flex flex-col md:p-10 gap-10 overflow-y-auto">
+          <TopBar
+            discountCount={discounts.length}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+          />
+          <DiscountTable
+            discounts={filteredDiscounts}
+            onAddDiscount={handleAddDiscount}
+            onEditDiscount={handleEditDiscount}
+            onDeleteDiscount={handleDeleteDiscount}
+            onRefresh={fetchDiscounts}
+            editingDiscount={editingDiscount}
+            setEditingDiscount={setEditingDiscount}
+          />
+        </main>
+      </div>
+    </ProtectedLayout>
   );
 }
