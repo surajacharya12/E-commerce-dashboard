@@ -137,9 +137,7 @@ export default function AdminReceiptPage() {
                     <div>₹${order.orderTotal?.deliveryFee || (order.deliveryMethod === 'homeDelivery' ? '150' : order.deliveryMethod === 'storeDelivery' ? '100' : '50')}</div>
                 </div>
                 <div class="item-row">
-                    <div>Tax (10%):</div>
-                    <div>₹${order.orderTotal?.tax || Math.round((order.orderTotal?.subtotal || order.totalPrice) * 0.1)}</div>
-                </div>
+                    <!-- Tax removed per request -->
                 ${order.orderTotal?.discount > 0 ? `
                 <div class="item-row">
                     <div>Discount:</div>
@@ -303,42 +301,53 @@ export default function AdminReceiptPage() {
                                 ))}
                             </div>
                         </div>
+{/* Order Summary */}
+<div className="mb-8 bg-gray-50 rounded-xl p-6">
+  <h3 className="text-xl font-bold text-black mb-4 border-b pb-2">Order Summary</h3>
+  <div className="space-y-3 text-lg text-black">
+    <div className="flex justify-between">
+      <span className="text-gray-800">Subtotal:</span>
+      <span className="font-semibold text-black">
+        ₹{order.orderTotal?.subtotal || order.totalPrice}
+      </span>
+    </div>
 
-                        {/* Order Summary */}
-                        <div className="mb-8 bg-gray-50/90 dark:bg-slate-800 rounded-xl p-6">
-                            <h3 className="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Order Summary</h3>
-                            <div className="space-y-3 text-lg">
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600">Subtotal:</span>
-                                    <span className="font-semibold">₹{order.orderTotal?.subtotal || order.totalPrice}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600">
-                                        {order.deliveryMethod === 'storeDelivery' ? 'Pickup Fee:' : 'Delivery Fee:'}
-                                    </span>
-                                    <span className="font-semibold">
-                                        {order.orderTotal?.deliveryFee !== undefined ?
-                                            `₹${order.orderTotal.deliveryFee}` :
-                                            order.deliveryMethod === 'homeDelivery' ? '₹150' :
-                                                order.deliveryMethod === 'storeDelivery' ? '₹100' :
-                                                    (order.orderTotal?.subtotal || order.totalPrice) > 500 ? 'Free' : '₹50'}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600">Tax (10%):</span>
-                                    <span className="font-semibold">₹{order.orderTotal?.tax !== undefined ? order.orderTotal.tax : Math.round((order.orderTotal?.subtotal || order.totalPrice) * 0.1)}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600">Discount:</span>
-                                    <span className="font-semibold text-green-600">-₹{order.orderTotal?.discount || 0}</span>
-                                </div>
-                                <hr className="border-gray-600 my-4" />
-                                <div className="flex justify-between text-2xl font-bold">
-                                    <span>Total Amount:</span>
-                                    <span className="text-indigo-600">₹{order.totalPrice}</span>
-                                </div>
-                            </div>
-                        </div>
+    <div className="flex justify-between">
+      <span className="text-gray-800">
+        {order.deliveryMethod === "storeDelivery"
+          ? "Pickup Fee:"
+          : "Delivery Fee:"}
+      </span>
+      <span className="font-semibold text-black">
+        {order.orderTotal?.deliveryFee !== undefined
+          ? `₹${order.orderTotal.deliveryFee}`
+          : order.deliveryMethod === "homeDelivery"
+          ? "₹150"
+          : order.deliveryMethod === "storeDelivery"
+          ? "₹100"
+          : (order.orderTotal?.subtotal || order.totalPrice) > 500
+          ? "Free"
+          : "₹50"}
+      </span>
+    </div>
+
+    {/* Discount */}
+    <div className="flex justify-between">
+      <span className="text-gray-800">Discount:</span>
+      <span className="font-semibold text-green-700">
+        -₹{order.orderTotal?.discount || 0}
+      </span>
+    </div>
+
+    <hr className="border-gray-300 my-4" />
+
+    <div className="flex justify-between text-2xl font-bold text-black">
+      <span>Total Amount:</span>
+      <span className="text-indigo-700">₹{order.totalPrice}</span>
+    </div>
+  </div>
+</div>
+
 
                         {/* Payment & Delivery Info */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -445,8 +454,7 @@ export default function AdminReceiptPage() {
                             <p className="mb-2 text-lg">Thank you for shopping with ShopEase!</p>
                             <p>For any queries, contact us at {supportEmail} | {supportPhone}</p>
                             <p className="mt-4 text-sm">This is a computer-generated receipt and does not require a signature.</p>
-                            <p className="mt-2 text-xs text-gray-400">Generated from Admin Dashboard</p>
-                        </div>
+                       </div>
                     </div>
                 </div>
 

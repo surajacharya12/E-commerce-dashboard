@@ -42,6 +42,7 @@ export default function AddProductDialog({
   const [variantTypeId, setVariantTypeId] = useState("");
   const [variantId, setVariantId] = useState("");
   const [adminRating, setAdminRating] = useState("");
+  const [pointsText, setPointsText] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [errors, setErrors] = useState({});
 
@@ -53,6 +54,7 @@ export default function AddProductDialog({
       setOfferPrice(initialData.offerPrice ?? "");
       setQuantity(initialData.stock?.toString() || initialData.quantity?.toString() || "");
       setAdminRating(initialData.rating?.adminRating?.toString() || "");
+  setPointsText(Array.isArray(initialData.points) ? initialData.points.join('\n') : (initialData.points || ""));
 
       // Use initialData for dropdowns, safely accessing _id from populated objects
       setCategoryId(initialData.proCategoryId?._id || "");
@@ -88,6 +90,7 @@ export default function AddProductDialog({
       setVariantId("");
       setImagePreviews(Array(5).fill(null));
       setImageFiles(Array(5).fill(null));
+      setPointsText("");
     }
     setErrors({});
   }, [initialData, isOpen]);
@@ -130,6 +133,10 @@ export default function AddProductDialog({
     fd.append("quantity", quantity);
     fd.append("stock", quantity); // Use same value for stock
     if (adminRating !== "") fd.append("adminRating", adminRating);
+
+  // Append points as JSON string (backend accepts JSON string or newline-separated)
+  const pointsArray = pointsText.split('\n').map(p => p.trim()).filter(Boolean);
+  if (pointsArray.length > 0) fd.append('points', JSON.stringify(pointsArray));
 
     if (categoryId) fd.append("proCategoryId", categoryId);
     if (subcategoryId) fd.append("proSubCategoryId", subcategoryId);
@@ -219,6 +226,18 @@ export default function AddProductDialog({
 
           {/* Description */}
           <Textarea placeholder="Product Description" value={description} onChange={(e) => setDescription(e.target.value)} />
+
+          {/* Product Highlights / Points - dedicated box */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Product Highlights (one per line)</label>
+            <Textarea
+              placeholder="Enter each highlight on a new line, e.g.\nFast charging battery\n2 year warranty"
+              value={pointsText}
+              onChange={(e) => setPointsText(e.target.value)}
+              rows={4}
+            />
+            <p className="text-xs text-gray-500 mt-1">Enter one highlight per line. These will appear in the product description area.</p>
+          </div>
 
           {/* Category / Subcategory / Brand */}
           <div className="grid grid-cols-3 gap-2">

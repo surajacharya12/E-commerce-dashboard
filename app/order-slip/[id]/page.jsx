@@ -144,9 +144,7 @@ export default function AdminOrderSlipPage() {
                     <div>₹${order.orderTotal?.deliveryFee || (order.deliveryMethod === 'homeDelivery' ? '150' : order.deliveryMethod === 'storeDelivery' ? '100' : '50')}</div>
                 </div>
                 <div class="item-row">
-                    <div>Tax (10%):</div>
-                    <div>₹${order.orderTotal?.tax || Math.round((order.orderTotal?.subtotal || order.totalPrice) * 0.1)}</div>
-                </div>
+                    <!-- Tax removed per request -->
                 ${order.orderTotal?.discount > 0 ? `
                 <div class="item-row">
                     <div>Discount:</div>
@@ -373,96 +371,104 @@ export default function AdminOrderSlipPage() {
                         </div>
                     </div>
 
-                    {/* Order Details Grid */}
-                    <div className="p-8">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                            {/* Order Information */}
-                            <div className="bg-gray-50 rounded-2xl p-6">
-                                <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                    <FiCalendar className="w-5 h-5 text-indigo-600" />
-                                    Order Information
-                                </h3>
-                                <div className="space-y-3">
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-600">Order Date:</span>
-                                        <span className="font-semibold">
-                                            {new Date(order.orderDate).toLocaleDateString('en-IN', {
-                                                year: 'numeric',
-                                                month: 'long',
-                                                day: 'numeric',
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            })}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-600">Order Number:</span>
-                                        <span className="font-semibold font-mono">
-                                            {order.orderNumber || order._id?.slice(-8).toUpperCase()}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-600">Payment Method:</span>
-                                        <span className="font-semibold capitalize">
-                                            {order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-600">Delivery Method:</span>
-                                        <span className="font-semibold capitalize flex items-center gap-1">
-                                            {order.deliveryMethod === 'homeDelivery' ? (
-                                                <>
-                                                    <FiHome className="w-4 h-4 text-green-600" />
-                                                    Home Delivery
-                                                </>
-                                            ) : order.deliveryMethod === 'storeDelivery' ? (
-                                                <>
-                                                    <FiShoppingBag className="w-4 h-4 text-blue-600" />
-                                                    Store Pickup
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <FiTruck className="w-4 h-4 text-gray-600" />
-                                                    Standard Delivery
-                                                </>
-                                            )}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-600">Total Amount:</span>
-                                        <span className="font-bold text-xl text-indigo-600">₹{order.totalPrice}</span>
-                                    </div>
-                                </div>
-                            </div>
+                  {/* Order Details Grid */}
+<div className="p-8">
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    {/* Order Information */}
+    <div className="bg-gray-50 rounded-2xl p-6">
+      <h3 className="text-xl font-bold text-black mb-4 flex items-center gap-2">
+        <FiCalendar className="w-5 h-5 text-indigo-600" />
+        Order Information
+      </h3>
+      <div className="space-y-3 text-black">
+        <div className="flex justify-between">
+          <span className="text-gray-800">Order Date:</span>
+          <span className="font-semibold text-black">
+            {new Date(order.orderDate).toLocaleDateString('en-IN', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-800">Order Number:</span>
+          <span className="font-semibold font-mono text-black">
+            {order.orderNumber || order._id?.slice(-8).toUpperCase()}
+          </span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-800">Payment Method:</span>
+          <span className="font-semibold capitalize text-black">
+            {order.paymentMethod === 'cod'
+              ? 'Cash on Delivery'
+              : 'Online Payment'}
+          </span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-800">Delivery Method:</span>
+          <span className="font-semibold capitalize flex items-center gap-1 text-black">
+            {order.deliveryMethod === 'homeDelivery' ? (
+              <>
+                <FiHome className="w-4 h-4 text-green-600" />
+                Home Delivery
+              </>
+            ) : order.deliveryMethod === 'storeDelivery' ? (
+              <>
+                <FiShoppingBag className="w-4 h-4 text-blue-600" />
+                Store Pickup
+              </>
+            ) : (
+              <>
+                <FiTruck className="w-4 h-4 text-gray-600" />
+                Standard Delivery
+              </>
+            )}
+          </span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-800">Total Amount:</span>
+          <span className="font-bold text-xl text-indigo-700">
+            ₹{order.totalPrice}
+          </span>
+        </div>
+      </div>
+    </div>
 
-                            {/* Customer Information */}
-                            <div className="bg-blue-50 rounded-2xl p-6">
-                                <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                    <FiMail className="w-5 h-5 text-blue-600" />
-                                    Customer Information
-                                </h3>
-                                <div className="space-y-3">
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-600">Name:</span>
-                                        <span className="font-semibold">
-                                            {order.userID?.name || 'N/A'}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-600">Email:</span>
-                                        <span className="font-semibold">
-                                            {order.userID?.email || 'N/A'}
-                                        </span>
-                                    </div>
-                                    {order.shippingAddress?.phone && order.shippingAddress.phone !== 'N/A' && (
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-600">Phone:</span>
-                                            <span className="font-semibold">{order.shippingAddress.phone}</span>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
+    {/* Customer Information */}
+    <div className="bg-blue-50 rounded-2xl p-6">
+      <h3 className="text-xl font-bold text-black mb-4 flex items-center gap-2">
+        <FiMail className="w-5 h-5 text-blue-600" />
+        Customer Information
+      </h3>
+      <div className="space-y-3 text-black">
+        <div className="flex justify-between">
+          <span className="text-gray-800">Name:</span>
+          <span className="font-semibold text-black">
+            {order.userID?.name || 'N/A'}
+          </span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-800">Email:</span>
+          <span className="font-semibold text-black">
+            {order.userID?.email || 'N/A'}
+          </span>
+        </div>
+        {order.shippingAddress?.phone &&
+          order.shippingAddress.phone !== 'N/A' && (
+            <div className="flex justify-between">
+              <span className="text-gray-800">Phone:</span>
+              <span className="font-semibold text-black">
+                {order.shippingAddress.phone}
+              </span>
+            </div>
+          )}
+      </div>
+    </div>
+  </div>
+</div>
 
                         {/* Delivery Information */}
                         <div className="bg-purple-50 rounded-2xl p-6 mb-8">
@@ -597,10 +603,7 @@ export default function AdminOrderSlipPage() {
                                                     (order.orderTotal?.subtotal || order.totalPrice) > 500 ? 'Free' : '₹50'}
                                     </span>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600">Tax (10%):</span>
-                                    <span className="font-semibold">₹{order.orderTotal?.tax !== undefined ? order.orderTotal.tax : Math.round((order.orderTotal?.subtotal || order.totalPrice) * 0.1)}</span>
-                                </div>
+                                {/* Tax removed per request */}
                                 <div className="flex justify-between">
                                     <span className="text-gray-600">Discount:</span>
                                     <span className="font-semibold text-green-600">-₹{order.orderTotal?.discount || 0}</span>
@@ -659,6 +662,6 @@ export default function AdminOrderSlipPage() {
             </div>
 
 
-        </div>
+    
     );
 }
