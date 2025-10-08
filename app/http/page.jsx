@@ -1,10 +1,11 @@
 // src/lib/utils/storeApi.js
 
-const API_URL =
+const url =
   process.env.NODE_ENV === "production"
     ? "https://e-commerce-backend-ar1h.vercel.app/"
     : "http://localhost:3001/";
-
+ 
+    export default url;
 export const storeApi = {
   getAll: async () => {
     try {
