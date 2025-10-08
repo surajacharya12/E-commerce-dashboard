@@ -1,8 +1,8 @@
-const url = "http://localhost:3001/";
+const url = "http://localhost:3001/" ||"https://e-commerce-backend-ar1h.vercel.app/";
 export default url;
 
 // src/lib/utils/storeApi.js
-const API_URL = "http://localhost:3001/";
+const API_URL = "http://localhost:3001/" || "https://e-commerce-backend-ar1h.vercel.app/";
 
 export const storeApi = {
   getAll: async () => {
