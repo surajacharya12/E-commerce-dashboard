@@ -1,5 +1,6 @@
+import url from "./http/page";
 // Simple API health check utility
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API_URL = url.replace(/\/$/, '') || "http://localhost:3001";
 
 export const checkAPIHealth = async () => {
   try {

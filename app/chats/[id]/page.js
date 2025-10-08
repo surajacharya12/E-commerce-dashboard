@@ -15,6 +15,7 @@ import {
   FiMail,
 } from "react-icons/fi";
 import ProtectedLayout from "../../components/ProtectedLayout";
+import url from "../../http/page";
 
 const AdminChatDetail = () => {
   const params = useParams();
@@ -25,7 +26,7 @@ const AdminChatDetail = () => {
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef(null);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+  const API_URL = url;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -70,7 +71,7 @@ const AdminChatDetail = () => {
     setSending(true);
 
     try {
-      const response = await fetch(`${API_URL}/chats/${params.id}/message`, {
+      const response = await fetch(`${API_URL}chats/${params.id}/message`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

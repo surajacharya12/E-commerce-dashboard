@@ -18,6 +18,7 @@ import {
   FiArrowRight,
 } from "react-icons/fi";
 import ProtectedLayout from "../components/ProtectedLayout";
+import url from "../http/page";
 
 const ModernAdminChats = () => {
   const [customerChats, setCustomerChats] = useState([]);
@@ -33,7 +34,7 @@ const ModernAdminChats = () => {
     pages: 0,
   });
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+  const API_URL = url;
   const router = useRouter();
 
   useEffect(() => {
@@ -44,7 +45,7 @@ const ModernAdminChats = () => {
     try {
       setLoading(true);
       const response = await fetch(
-        `${API_URL}/chats/admin/all?page=${pagination.page}&limit=${pagination.limit}&status=${statusFilter}`
+        `${API_URL}chats/admin/all?page=${pagination.page}&limit=${pagination.limit}&status=${statusFilter}`
       );
       const result = await response.json();
 

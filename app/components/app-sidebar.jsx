@@ -7,6 +7,7 @@ import {
   Grid, Tag, Layers, Box, MessagesSquare, Repeat, Type, ShoppingCart, Gift, Percent, Image, Bell, MapPin, LogOut, User, Clock
 } from "lucide-react"
 import { useAuth } from "../../hooks/useAuth"
+import url from "../http/page"
 
 import {
   Sidebar,
@@ -44,7 +45,7 @@ export function AppSidebar() {
     unreadChats: 0
   })
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
+  const API_URL = url;
 
   // Fetch chat statistics
   const fetchChatStats = async () => {
