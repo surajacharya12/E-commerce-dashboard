@@ -50,7 +50,7 @@ export function AppSidebar() {
   // Fetch chat statistics
   const fetchChatStats = async () => {
     try {
-      const response = await fetch(`${API_URL}/chats/admin/all?page=1&limit=100&status=all`)
+      const response = await fetch(`${API_URL}chats/admin/all?page=1&limit=100&status=all`)
       const result = await response.json()
 
       if (result.success) {

@@ -46,7 +46,7 @@ const AdminChatDetail = () => {
     try {
       setLoading(true);
       const response = await fetch(
-        `${API_URL}/chats/${params.id}?userType=admin`
+        `${API_URL}chats/${params.id}?userType=admin`
       );
       const result = await response.json();
 

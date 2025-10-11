@@ -46,6 +46,7 @@ const PosterTable = ({ posters, onAddPoster, onEditPoster, onDeletePoster, onRef
             <tr>
               <th className="px-12 py-6 text-sm font-semibold text-gray-300">Poster Image</th>
               <th className="px-12 py-3 text-sm font-semibold text-gray-300">Poster Name</th>
+              <th className="px-12 py-3 text-sm font-semibold text-gray-300">SubText</th>
               <th className="px-12 py-3 text-sm font-semibold text-gray-300">Date</th>
               <th className="px-40 py-3 text-sm font-semibold text-gray-300">Edit</th>
               <th className="px-6 py-3 text-sm font-semibold text-gray-300">Delete</th>
@@ -67,6 +68,7 @@ const PosterTable = ({ posters, onAddPoster, onEditPoster, onDeletePoster, onRef
                     )}
                   </td>
                   <td className="px-12 py-4">{poster.posterName}</td>
+                  <td className="px-12 py-4">{poster.subText}</td>
                   <td className="px-12 py-4">{new Date(poster.createdAt).toLocaleDateString()}</td>
                   <td className="px-40 py-4">
                     <AddPosterDialog onAddPoster={onAddPoster} onEditPoster={onEditPoster} initialData={poster}>

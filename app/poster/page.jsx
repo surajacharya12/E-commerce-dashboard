@@ -5,8 +5,8 @@ import TopBar from "./components/TopBar";
 import PosterTable from "./components/PosterTable";
 import url from "../http/page";
 import { toast } from "sonner";
-
 import ProtectedLayout from "../components/ProtectedLayout";
+
 export default function Poster() {
   const [posters, setPosters] = useState([]);
   const [editingPoster, setEditingPoster] = useState(null);
@@ -19,13 +19,13 @@ export default function Poster() {
       if (data.success && Array.isArray(data.data)) {
         setPosters(data.data);
       } else {
-        console.error("API returned an unexpected structure:", data);
+        console.error("API returned unexpected structure:", data);
         setPosters([]);
       }
     } catch (err) {
       console.error("Fetch error:", err);
-      setPosters([]);
       toast.error("Failed to fetch posters.");
+      setPosters([]);
     }
   }, []);
 
@@ -37,6 +37,7 @@ export default function Poster() {
     try {
       const formData = new FormData();
       formData.append("posterName", newPosterData.posterName);
+      formData.append("subText", newPosterData.subText || "");
       if (newPosterData.posterFile) {
         formData.append("img", newPosterData.posterFile);
       }
@@ -63,6 +64,7 @@ export default function Poster() {
     try {
       const formData = new FormData();
       formData.append("posterName", updatedPosterData.posterName);
+      formData.append("subText", updatedPosterData.subText || "");
       if (updatedPosterData.posterFile) {
         formData.append("img", updatedPosterData.posterFile);
       }
