@@ -20,9 +20,9 @@ const Login = () => {
         setError("");
 
         // Simple authentication check
-        if (username === "ShopEase" && password === "shopease123") {
+        if (username === "ShopSwift" && password === "ShopSwift123") {
             // Use auth context login (no localStorage persistence)
-            login("ShopEase");
+            login("ShopSwift");
             console.log("✅ Login successful - session will not persist across page refreshes");
 
             // Redirect to dashboard
@@ -64,7 +64,7 @@ const Login = () => {
 
                             {/* Title */}
                             <h1 className="text-3xl font-black bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent mb-2">
-                                ShopEase
+                                ShopSwift
                             </h1>
                             <p className="text-gray-400 text-base font-medium">
                                 Admin Dashboard
@@ -174,10 +174,10 @@ const Login = () => {
                                 <p className="text-gray-300 text-sm font-semibold mb-2">Demo Credentials</p>
                                 <div className="space-y-1">
                                     <p className="text-gray-400 text-xs">
-                                        Username: <span className="text-blue-400 font-mono bg-gray-800/50 px-2 py-1 rounded">ShopEase</span>
+                                        Username: <span className="text-blue-400 font-mono bg-gray-800/50 px-2 py-1 rounded">ShopSwift</span>
                                     </p>
                                     <p className="text-gray-400 text-xs">
-                                        Password: <span className="text-purple-400 font-mono bg-gray-800/50 px-2 py-1 rounded">shopease123</span>
+                                        Password: <span className="text-purple-400 font-mono bg-gray-800/50 px-2 py-1 rounded">ShopSwift123</span>
                                     </p>
                                 </div>
                             </div>*/}

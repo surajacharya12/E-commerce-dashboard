@@ -80,7 +80,7 @@ export default function AdminReceiptPage() {
                 </style>
             </head>
             <body>
-                <div class="center bold">SHOPEASE</div>
+                <div class="center bold">ShopSwift</div>
                 <div class="center small">Receipt</div>
                 <div class="line"></div>
                 
@@ -104,7 +104,7 @@ export default function AdminReceiptPage() {
                 
                 ${order.deliveryMethod === 'storeDelivery' ? `
                 <div class="bold">PICKUP FROM:</div>
-                <div class="small">${order.selectedStore?.storeName || 'ShopEase Store - Main Branch'}</div>
+                <div class="small">${order.selectedStore?.storeName || 'ShopSwift Store - Main Branch'}</div>
                 <div class="small">${order.selectedStore?.storeLocation || '123 Commerce Street'}</div>
                 <div class="small">${order.selectedStore?.storeLocation ? '' : 'Kathmandu, '}Nepal</div>
                 <div class="small">Ready in 2-3 days</div>
@@ -240,7 +240,7 @@ export default function AdminReceiptPage() {
                                     <FiCheck className="w-8 h-8" />
                                 </div>
                                 <div>
-                                    <h2 className="text-3xl font-bold">ShopEase</h2>
+                                    <h2 className="text-3xl font-bold">ShopSwift</h2>
                                     <p className="text-indigo-100">Order Confirmation</p>
                                 </div>
                             </div>
@@ -301,52 +301,52 @@ export default function AdminReceiptPage() {
                                 ))}
                             </div>
                         </div>
-{/* Order Summary */}
-<div className="mb-8 bg-gray-50 rounded-xl p-6">
-  <h3 className="text-xl font-bold text-black mb-4 border-b pb-2">Order Summary</h3>
-  <div className="space-y-3 text-lg text-black">
-    <div className="flex justify-between">
-      <span className="text-gray-800">Subtotal:</span>
-      <span className="font-semibold text-black">
-        ₹{order.orderTotal?.subtotal || order.totalPrice}
-      </span>
-    </div>
+                        {/* Order Summary */}
+                        <div className="mb-8 bg-gray-50 rounded-xl p-6">
+                            <h3 className="text-xl font-bold text-black mb-4 border-b pb-2">Order Summary</h3>
+                            <div className="space-y-3 text-lg text-black">
+                                <div className="flex justify-between">
+                                    <span className="text-gray-800">Subtotal:</span>
+                                    <span className="font-semibold text-black">
+                                        ₹{order.orderTotal?.subtotal || order.totalPrice}
+                                    </span>
+                                </div>
 
-    <div className="flex justify-between">
-      <span className="text-gray-800">
-        {order.deliveryMethod === "storeDelivery"
-          ? "Pickup Fee:"
-          : "Delivery Fee:"}
-      </span>
-      <span className="font-semibold text-black">
-        {order.orderTotal?.deliveryFee !== undefined
-          ? `₹${order.orderTotal.deliveryFee}`
-          : order.deliveryMethod === "homeDelivery"
-          ? "₹150"
-          : order.deliveryMethod === "storeDelivery"
-          ? "₹100"
-          : (order.orderTotal?.subtotal || order.totalPrice) > 500
-          ? "Free"
-          : "₹50"}
-      </span>
-    </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-800">
+                                        {order.deliveryMethod === "storeDelivery"
+                                            ? "Pickup Fee:"
+                                            : "Delivery Fee:"}
+                                    </span>
+                                    <span className="font-semibold text-black">
+                                        {order.orderTotal?.deliveryFee !== undefined
+                                            ? `₹${order.orderTotal.deliveryFee}`
+                                            : order.deliveryMethod === "homeDelivery"
+                                                ? "₹150"
+                                                : order.deliveryMethod === "storeDelivery"
+                                                    ? "₹100"
+                                                    : (order.orderTotal?.subtotal || order.totalPrice) > 500
+                                                        ? "Free"
+                                                        : "₹50"}
+                                    </span>
+                                </div>
 
-    {/* Discount */}
-    <div className="flex justify-between">
-      <span className="text-gray-800">Discount:</span>
-      <span className="font-semibold text-green-700">
-        -₹{order.orderTotal?.discount || 0}
-      </span>
-    </div>
+                                {/* Discount */}
+                                <div className="flex justify-between">
+                                    <span className="text-gray-800">Discount:</span>
+                                    <span className="font-semibold text-green-700">
+                                        -₹{order.orderTotal?.discount || 0}
+                                    </span>
+                                </div>
 
-    <hr className="border-gray-300 my-4" />
+                                <hr className="border-gray-300 my-4" />
 
-    <div className="flex justify-between text-2xl font-bold text-black">
-      <span>Total Amount:</span>
-      <span className="text-indigo-700">₹{order.totalPrice}</span>
-    </div>
-  </div>
-</div>
+                                <div className="flex justify-between text-2xl font-bold text-black">
+                                    <span>Total Amount:</span>
+                                    <span className="text-indigo-700">₹{order.totalPrice}</span>
+                                </div>
+                            </div>
+                        </div>
 
 
                         {/* Payment & Delivery Info */}
@@ -412,7 +412,7 @@ export default function AdminReceiptPage() {
                                             </>
                                         ) : (
                                             <>
-                                                <p className="font-semibold text-blue-700">ShopEase Store - Main Branch</p>
+                                                <p className="font-semibold text-blue-700">ShopSwift Store - Main Branch</p>
                                                 <p>123 Commerce Street, Shopping District</p>
                                                 <p>Kathmandu, Nepal</p>
                                                 <p className="mt-2 font-medium">Store Hours: 10:00 AM - 8:00 PM</p>
@@ -451,10 +451,10 @@ export default function AdminReceiptPage() {
 
                         {/* Footer */}
                         <div className="text-center text-gray-500 border-t pt-6">
-                            <p className="mb-2 text-lg">Thank you for shopping with ShopEase!</p>
+                            <p className="mb-2 text-lg">Thank you for shopping with ShopSwift!</p>
                             <p>For any queries, contact us at {supportEmail} | {supportPhone}</p>
                             <p className="mt-4 text-sm">This is a computer-generated receipt and does not require a signature.</p>
-                       </div>
+                        </div>
                     </div>
                 </div>
 

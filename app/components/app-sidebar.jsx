@@ -96,14 +96,14 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar>
-      <SidebarContent>
-        <SidebarGroup>
+    <Sidebar >
+      <SidebarContent >
+        <SidebarGroup className="w-57 h-auto mx-auto mt-30">
           <SidebarGroupLabel>
             <img
               src="/assets/images/logo.png"
               alt="Logo"
-              className="w-57 h-auto mx-auto mt-10"
+
             />
           </SidebarGroupLabel>
 

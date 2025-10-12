@@ -85,7 +85,7 @@ export default function AdminOrderSlipPage() {
                 </style>
             </head>
             <body>
-                <div class="center bold">SHOPEASE</div>
+                <div class="center bold">ShopSwift</div>
                 <div class="center small">Order Slip</div>
                 <div class="line"></div>
                 
@@ -109,7 +109,7 @@ export default function AdminOrderSlipPage() {
                 
                 ${order.deliveryMethod === 'storeDelivery' ? `
                 <div class="bold">PICKUP LOCATION:</div>
-                <div class="small">${order.selectedStore?.storeName || 'ShopEase Store - Main Branch'}</div>
+                <div class="small">${order.selectedStore?.storeName || 'ShopSwift Store - Main Branch'}</div>
                 <div class="small">${order.selectedStore?.storeLocation || '123 Commerce Street'}</div>
                 <div class="small">${order.selectedStore?.storeLocation ? '' : 'Kathmandu, '}Nepal</div>
                 ${order.selectedStore?.storePhoneNumber ? `<div class="small">Ph: ${order.selectedStore.storePhoneNumber}</div>` : ''}
@@ -295,7 +295,7 @@ export default function AdminOrderSlipPage() {
                                     <FiShoppingBag className="w-8 h-8" />
                                 </div>
                                 <div>
-                                    <h2 className="text-3xl font-bold">ShopEase</h2>
+                                    <h2 className="text-3xl font-bold">ShopSwift</h2>
                                     <p className="text-indigo-100">Order Slip</p>
                                 </div>
                             </div>
@@ -371,297 +371,297 @@ export default function AdminOrderSlipPage() {
                         </div>
                     </div>
 
-                  {/* Order Details Grid */}
-<div className="p-8">
-  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-    {/* Order Information */}
-    <div className="bg-gray-50 rounded-2xl p-6">
-      <h3 className="text-xl font-bold text-black mb-4 flex items-center gap-2">
-        <FiCalendar className="w-5 h-5 text-indigo-600" />
-        Order Information
-      </h3>
-      <div className="space-y-3 text-black">
-        <div className="flex justify-between">
-          <span className="text-gray-800">Order Date:</span>
-          <span className="font-semibold text-black">
-            {new Date(order.orderDate).toLocaleDateString('en-IN', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-gray-800">Order Number:</span>
-          <span className="font-semibold font-mono text-black">
-            {order.orderNumber || order._id?.slice(-8).toUpperCase()}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-gray-800">Payment Method:</span>
-          <span className="font-semibold capitalize text-black">
-            {order.paymentMethod === 'cod'
-              ? 'Cash on Delivery'
-              : 'Online Payment'}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-gray-800">Delivery Method:</span>
-          <span className="font-semibold capitalize flex items-center gap-1 text-black">
-            {order.deliveryMethod === 'homeDelivery' ? (
-              <>
-                <FiHome className="w-4 h-4 text-green-600" />
-                Home Delivery
-              </>
-            ) : order.deliveryMethod === 'storeDelivery' ? (
-              <>
-                <FiShoppingBag className="w-4 h-4 text-blue-600" />
-                Store Pickup
-              </>
-            ) : (
-              <>
-                <FiTruck className="w-4 h-4 text-gray-600" />
-                Standard Delivery
-              </>
-            )}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-gray-800">Total Amount:</span>
-          <span className="font-bold text-xl text-indigo-700">
-            ₹{order.totalPrice}
-          </span>
-        </div>
-      </div>
-    </div>
-
-    {/* Customer Information */}
-    <div className="bg-blue-50 rounded-2xl p-6">
-      <h3 className="text-xl font-bold text-black mb-4 flex items-center gap-2">
-        <FiMail className="w-5 h-5 text-blue-600" />
-        Customer Information
-      </h3>
-      <div className="space-y-3 text-black">
-        <div className="flex justify-between">
-          <span className="text-gray-800">Name:</span>
-          <span className="font-semibold text-black">
-            {order.userID?.name || 'N/A'}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-gray-800">Email:</span>
-          <span className="font-semibold text-black">
-            {order.userID?.email || 'N/A'}
-          </span>
-        </div>
-        {order.shippingAddress?.phone &&
-          order.shippingAddress.phone !== 'N/A' && (
-            <div className="flex justify-between">
-              <span className="text-gray-800">Phone:</span>
-              <span className="font-semibold text-black">
-                {order.shippingAddress.phone}
-              </span>
-            </div>
-          )}
-      </div>
-    </div>
-  </div>
-</div>
-
-                        {/* Delivery Information */}
-                        <div className="bg-purple-50 rounded-2xl p-6 mb-8">
-                            <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                <FiMapPin className="w-5 h-5 text-purple-600" />
-                                {order.deliveryMethod === 'storeDelivery' ? 'Pickup Information' : 'Delivery Address'}
-                            </h3>
-
-                            {order.deliveryMethod === 'storeDelivery' ? (
-                                <div className="space-y-4">
-                                    <div className="bg-blue-100 border border-blue-300 rounded-xl p-4">
-                                        <h4 className="font-bold text-blue-800 mb-2 flex items-center gap-2">
-                                            <FiShoppingBag className="w-5 h-5" />
-                                            Store Pickup Details
-                                        </h4>
-                                        <div className="text-blue-700 space-y-1">
-                                            {order.selectedStore ? (
+                    {/* Order Details Grid */}
+                    <div className="p-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                            {/* Order Information */}
+                            <div className="bg-gray-50 rounded-2xl p-6">
+                                <h3 className="text-xl font-bold text-black mb-4 flex items-center gap-2">
+                                    <FiCalendar className="w-5 h-5 text-indigo-600" />
+                                    Order Information
+                                </h3>
+                                <div className="space-y-3 text-black">
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-800">Order Date:</span>
+                                        <span className="font-semibold text-black">
+                                            {new Date(order.orderDate).toLocaleDateString('en-IN', {
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                            })}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-800">Order Number:</span>
+                                        <span className="font-semibold font-mono text-black">
+                                            {order.orderNumber || order._id?.slice(-8).toUpperCase()}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-800">Payment Method:</span>
+                                        <span className="font-semibold capitalize text-black">
+                                            {order.paymentMethod === 'cod'
+                                                ? 'Cash on Delivery'
+                                                : 'Online Payment'}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-800">Delivery Method:</span>
+                                        <span className="font-semibold capitalize flex items-center gap-1 text-black">
+                                            {order.deliveryMethod === 'homeDelivery' ? (
                                                 <>
-                                                    <p className="font-semibold">{order.selectedStore.storeName}</p>
-                                                    <p>{order.selectedStore.storeLocation}</p>
-                                                    <p>Nepal</p>
-                                                    {order.selectedStore.storePhoneNumber && (
-                                                        <p className="font-medium mt-2">📞 {order.selectedStore.storePhoneNumber}</p>
-                                                    )}
-                                                    <p className="font-medium">Manager: {order.selectedStore.storeManagerName}</p>
-                                                    <p className="font-medium">Store Hours: 10:00 AM - 8:00 PM (Mon-Sun)</p>
-                                                    {order.deliveryMethod === 'storeDelivery' && (
-                                                        <p className="font-medium">Pickup Fee: ₹{order.orderTotal?.deliveryFee || 100}</p>
-                                                    )}
+                                                    <FiHome className="w-4 h-4 text-green-600" />
+                                                    Home Delivery
+                                                </>
+                                            ) : order.deliveryMethod === 'storeDelivery' ? (
+                                                <>
+                                                    <FiShoppingBag className="w-4 h-4 text-blue-600" />
+                                                    Store Pickup
                                                 </>
                                             ) : (
                                                 <>
-                                                    <p className="font-semibold">ShopEase Store - Main Branch</p>
-                                                    <p>123 Commerce Street, Shopping District</p>
-                                                    <p>Kathmandu, Nepal</p>
-                                                    <p className="font-medium mt-2">Store Hours: 10:00 AM - 8:00 PM (Mon-Sun)</p>
-                                                    {order.deliveryMethod === 'storeDelivery' && (
-                                                        <p className="font-medium">Pickup Fee: ₹{order.orderTotal?.deliveryFee || 100}</p>
-                                                    )}
+                                                    <FiTruck className="w-4 h-4 text-gray-600" />
+                                                    Standard Delivery
                                                 </>
                                             )}
-                                        </div>
+                                        </span>
                                     </div>
-                                    <div className="bg-yellow-100 border border-yellow-300 rounded-xl p-4">
-                                        <h4 className="font-bold text-yellow-800 mb-2">Pickup Instructions:</h4>
-                                        <ul className="text-yellow-700 space-y-1 text-sm">
-                                            <li>• Bring a valid ID and this order slip</li>
-                                            <li>• Order will be ready for pickup in 2-3 business days</li>
-                                            <li>• You'll receive a pickup notification via SMS/Email</li>
-                                            <li>• Items will be held for 7 days after notification</li>
-                                        </ul>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-800">Total Amount:</span>
+                                        <span className="font-bold text-xl text-indigo-700">
+                                            ₹{order.totalPrice}
+                                        </span>
                                     </div>
                                 </div>
-                            ) : (
-                                <div className="space-y-4">
-                                    <div className="text-gray-700 text-lg leading-relaxed">
-                                        <p className="font-semibold">{order.shippingAddress?.street}</p>
-                                        <p>{order.shippingAddress?.city}, {order.shippingAddress?.state}</p>
-                                        <p>{order.shippingAddress?.postalCode}, {order.shippingAddress?.country}</p>
-                                        {order.shippingAddress?.phone && order.shippingAddress.phone !== 'N/A' && (
-                                            <p className="mt-2 font-medium">Contact: {order.shippingAddress.phone}</p>
+                            </div>
+
+                            {/* Customer Information */}
+                            <div className="bg-blue-50 rounded-2xl p-6">
+                                <h3 className="text-xl font-bold text-black mb-4 flex items-center gap-2">
+                                    <FiMail className="w-5 h-5 text-blue-600" />
+                                    Customer Information
+                                </h3>
+                                <div className="space-y-3 text-black">
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-800">Name:</span>
+                                        <span className="font-semibold text-black">
+                                            {order.userID?.name || 'N/A'}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-800">Email:</span>
+                                        <span className="font-semibold text-black">
+                                            {order.userID?.email || 'N/A'}
+                                        </span>
+                                    </div>
+                                    {order.shippingAddress?.phone &&
+                                        order.shippingAddress.phone !== 'N/A' && (
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-800">Phone:</span>
+                                                <span className="font-semibold text-black">
+                                                    {order.shippingAddress.phone}
+                                                </span>
+                                            </div>
+                                        )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Delivery Information */}
+                    <div className="bg-purple-50 rounded-2xl p-6 mb-8">
+                        <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <FiMapPin className="w-5 h-5 text-purple-600" />
+                            {order.deliveryMethod === 'storeDelivery' ? 'Pickup Information' : 'Delivery Address'}
+                        </h3>
+
+                        {order.deliveryMethod === 'storeDelivery' ? (
+                            <div className="space-y-4">
+                                <div className="bg-blue-100 border border-blue-300 rounded-xl p-4">
+                                    <h4 className="font-bold text-blue-800 mb-2 flex items-center gap-2">
+                                        <FiShoppingBag className="w-5 h-5" />
+                                        Store Pickup Details
+                                    </h4>
+                                    <div className="text-blue-700 space-y-1">
+                                        {order.selectedStore ? (
+                                            <>
+                                                <p className="font-semibold">{order.selectedStore.storeName}</p>
+                                                <p>{order.selectedStore.storeLocation}</p>
+                                                <p>Nepal</p>
+                                                {order.selectedStore.storePhoneNumber && (
+                                                    <p className="font-medium mt-2">📞 {order.selectedStore.storePhoneNumber}</p>
+                                                )}
+                                                <p className="font-medium">Manager: {order.selectedStore.storeManagerName}</p>
+                                                <p className="font-medium">Store Hours: 10:00 AM - 8:00 PM (Mon-Sun)</p>
+                                                {order.deliveryMethod === 'storeDelivery' && (
+                                                    <p className="font-medium">Pickup Fee: ₹{order.orderTotal?.deliveryFee || 100}</p>
+                                                )}
+                                            </>
+                                        ) : (
+                                            <>
+                                                <p className="font-semibold">ShopSwift Store - Main Branch</p>
+                                                <p>123 Commerce Street, Shopping District</p>
+                                                <p>Kathmandu, Nepal</p>
+                                                <p className="font-medium mt-2">Store Hours: 10:00 AM - 8:00 PM (Mon-Sun)</p>
+                                                {order.deliveryMethod === 'storeDelivery' && (
+                                                    <p className="font-medium">Pickup Fee: ₹{order.orderTotal?.deliveryFee || 100}</p>
+                                                )}
+                                            </>
                                         )}
                                     </div>
-                                    <div className="bg-green-100 border border-green-300 rounded-xl p-4">
-                                        <h4 className="font-bold text-green-800 mb-2 flex items-center gap-2">
-                                            <FiHome className="w-5 h-5" />
-                                            Home Delivery Details
-                                        </h4>
-                                        <div className="text-green-700 space-y-1">
-                                            {order.deliveryMethod === 'homeDelivery' && (
-                                                <p className="font-medium">Delivery Fee: ₹{order.orderTotal?.deliveryFee || 150}</p>
-                                            )}
-                                            <p>Estimated Delivery: 3-5 business days</p>
-                                            <p>Delivery Time: 9:00 AM - 6:00 PM</p>
-                                            <p className="text-sm mt-2">• Please ensure someone is available to receive the order</p>
-                                            <p className="text-sm">• ID verification may be required</p>
-                                        </div>
-                                    </div>
                                 </div>
-                            )}
-                        </div>
-
-                        {/* Order Items */}
-                        <div className="mb-8">
-                            <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                                <FiShoppingBag className="w-5 h-5 text-green-600" />
-                                Order Items ({order.items?.length || 0})
-                            </h3>
+                                <div className="bg-yellow-100 border border-yellow-300 rounded-xl p-4">
+                                    <h4 className="font-bold text-yellow-800 mb-2">Pickup Instructions:</h4>
+                                    <ul className="text-yellow-700 space-y-1 text-sm">
+                                        <li>• Bring a valid ID and this order slip</li>
+                                        <li>• Order will be ready for pickup in 2-3 business days</li>
+                                        <li>• You'll receive a pickup notification via SMS/Email</li>
+                                        <li>• Items will be held for 7 days after notification</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        ) : (
                             <div className="space-y-4">
-                                {order.items?.map((item, index) => (
-                                    <div key={index} className="flex justify-between items-center p-6 border-2 border-gray-200 rounded-2xl hover:border-indigo-300 transition-colors">
-                                        <div className="flex-1">
-                                            <h4 className="font-bold text-lg text-gray-800">{item.productName}</h4>
-                                            {item.variant && (
-                                                <p className="text-gray-600 mt-1">Variant: {item.variant}</p>
-                                            )}
-                                            <div className="flex items-center gap-4 mt-2">
-                                                <span className="text-gray-600">Quantity: {item.quantity}</span>
-                                                <span className="text-gray-600">Price: ₹{item.price} each</span>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="font-bold text-2xl text-indigo-600">
-                                                ₹{(item.price * item.quantity).toFixed(2)}
-                                            </p>
-                                        </div>
+                                <div className="text-gray-700 text-lg leading-relaxed">
+                                    <p className="font-semibold">{order.shippingAddress?.street}</p>
+                                    <p>{order.shippingAddress?.city}, {order.shippingAddress?.state}</p>
+                                    <p>{order.shippingAddress?.postalCode}, {order.shippingAddress?.country}</p>
+                                    {order.shippingAddress?.phone && order.shippingAddress.phone !== 'N/A' && (
+                                        <p className="mt-2 font-medium">Contact: {order.shippingAddress.phone}</p>
+                                    )}
+                                </div>
+                                <div className="bg-green-100 border border-green-300 rounded-xl p-4">
+                                    <h4 className="font-bold text-green-800 mb-2 flex items-center gap-2">
+                                        <FiHome className="w-5 h-5" />
+                                        Home Delivery Details
+                                    </h4>
+                                    <div className="text-green-700 space-y-1">
+                                        {order.deliveryMethod === 'homeDelivery' && (
+                                            <p className="font-medium">Delivery Fee: ₹{order.orderTotal?.deliveryFee || 150}</p>
+                                        )}
+                                        <p>Estimated Delivery: 3-5 business days</p>
+                                        <p>Delivery Time: 9:00 AM - 6:00 PM</p>
+                                        <p className="text-sm mt-2">• Please ensure someone is available to receive the order</p>
+                                        <p className="text-sm">• ID verification may be required</p>
                                     </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Order Summary */}
-                        <div className="bg-gradient-to-r from-gray-50 to-indigo-50 rounded-2xl p-6 mb-8">
-                            <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                                <FiCreditCard className="w-5 h-5 text-indigo-600" />
-                                Order Summary
-                            </h3>
-                            <div className="space-y-4 text-lg">
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600">Subtotal:</span>
-                                    <span className="font-semibold">₹{order.orderTotal?.subtotal || order.totalPrice}</span>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600">
-                                        {order.deliveryMethod === 'storeDelivery' ? 'Pickup Fee:' : 'Delivery Fee:'}
-                                    </span>
-                                    <span className="font-semibold">
-                                        {order.orderTotal?.deliveryFee !== undefined ?
-                                            `₹${order.orderTotal.deliveryFee}` :
-                                            order.deliveryMethod === 'homeDelivery' ? '₹150' :
-                                                order.deliveryMethod === 'storeDelivery' ? '₹100' :
-                                                    (order.orderTotal?.subtotal || order.totalPrice) > 500 ? 'Free' : '₹50'}
-                                    </span>
-                                </div>
-                                {/* Tax removed per request */}
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600">Discount:</span>
-                                    <span className="font-semibold text-green-600">-₹{order.orderTotal?.discount || 0}</span>
-                                </div>
-                                <hr className="border-gray-300 my-4" />
-                                <div className="flex justify-between text-2xl font-bold">
-                                    <span>Total Amount:</span>
-                                    <span className="text-indigo-600">₹{order.totalPrice}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Tracking Information */}
-                        {order.trackingUrl && (
-                            <div className="bg-green-50 rounded-2xl p-6 mb-8">
-                                <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                    <FiTruck className="w-5 h-5 text-green-600" />
-                                    Track Your Order
-                                </h3>
-                                <a
-                                    href={order.trackingUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors"
-                                >
-                                    <FiTruck className="w-5 h-5" />
-                                    Track Package
-                                </a>
                             </div>
                         )}
+                    </div>
 
-                        {/* Footer */}
-                        <div className="text-center text-gray-500 border-t-2 border-gray-200 pt-8">
-                            <div className="mb-4">
-                                <h4 className="text-lg font-bold text-gray-800 mb-2">Thank you for shopping with ShopEase!</h4>
-                                <p className="text-lg">We appreciate your business and hope you love your purchase.</p>
+                    {/* Order Items */}
+                    <div className="mb-8">
+                        <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                            <FiShoppingBag className="w-5 h-5 text-green-600" />
+                            Order Items ({order.items?.length || 0})
+                        </h3>
+                        <div className="space-y-4">
+                            {order.items?.map((item, index) => (
+                                <div key={index} className="flex justify-between items-center p-6 border-2 border-gray-200 rounded-2xl hover:border-indigo-300 transition-colors">
+                                    <div className="flex-1">
+                                        <h4 className="font-bold text-lg text-gray-800">{item.productName}</h4>
+                                        {item.variant && (
+                                            <p className="text-gray-600 mt-1">Variant: {item.variant}</p>
+                                        )}
+                                        <div className="flex items-center gap-4 mt-2">
+                                            <span className="text-gray-600">Quantity: {item.quantity}</span>
+                                            <span className="text-gray-600">Price: ₹{item.price} each</span>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="font-bold text-2xl text-indigo-600">
+                                            ₹{(item.price * item.quantity).toFixed(2)}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Order Summary */}
+                    <div className="bg-gradient-to-r from-gray-50 to-indigo-50 rounded-2xl p-6 mb-8">
+                        <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                            <FiCreditCard className="w-5 h-5 text-indigo-600" />
+                            Order Summary
+                        </h3>
+                        <div className="space-y-4 text-lg">
+                            <div className="flex justify-between">
+                                <span className="text-gray-600">Subtotal:</span>
+                                <span className="font-semibold">₹{order.orderTotal?.subtotal || order.totalPrice}</span>
                             </div>
-                            <div className="space-y-2">
-                                <p>For any queries or support, contact us:</p>
-                                <p className="flex items-center justify-center gap-4">
-                                    <span className="flex items-center gap-1">
-                                        <FiMail className="w-4 h-4" />
-                                        {supportEmail}
-                                    </span>
-                                    <span className="flex items-center gap-1">
-                                        <FiPhone className="w-4 h-4" />
-                                        {supportPhone}
-                                    </span>
-                                </p>
-                                <p className="text-sm mt-4">This order slip is valid until delivery completion.</p>
-                                <p className="text-xs text-gray-400 mt-2">Generated from Admin Dashboard</p>
+                            <div className="flex justify-between">
+                                <span className="text-gray-600">
+                                    {order.deliveryMethod === 'storeDelivery' ? 'Pickup Fee:' : 'Delivery Fee:'}
+                                </span>
+                                <span className="font-semibold">
+                                    {order.orderTotal?.deliveryFee !== undefined ?
+                                        `₹${order.orderTotal.deliveryFee}` :
+                                        order.deliveryMethod === 'homeDelivery' ? '₹150' :
+                                            order.deliveryMethod === 'storeDelivery' ? '₹100' :
+                                                (order.orderTotal?.subtotal || order.totalPrice) > 500 ? 'Free' : '₹50'}
+                                </span>
                             </div>
+                            {/* Tax removed per request */}
+                            <div className="flex justify-between">
+                                <span className="text-gray-600">Discount:</span>
+                                <span className="font-semibold text-green-600">-₹{order.orderTotal?.discount || 0}</span>
+                            </div>
+                            <hr className="border-gray-300 my-4" />
+                            <div className="flex justify-between text-2xl font-bold">
+                                <span>Total Amount:</span>
+                                <span className="text-indigo-600">₹{order.totalPrice}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Tracking Information */}
+                    {order.trackingUrl && (
+                        <div className="bg-green-50 rounded-2xl p-6 mb-8">
+                            <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                <FiTruck className="w-5 h-5 text-green-600" />
+                                Track Your Order
+                            </h3>
+                            <a
+                                href={order.trackingUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors"
+                            >
+                                <FiTruck className="w-5 h-5" />
+                                Track Package
+                            </a>
+                        </div>
+                    )}
+
+                    {/* Footer */}
+                    <div className="text-center text-gray-500 border-t-2 border-gray-200 pt-8">
+                        <div className="mb-4">
+                            <h4 className="text-lg font-bold text-gray-800 mb-2">Thank you for shopping with ShopSwift!</h4>
+                            <p className="text-lg">We appreciate your business and hope you love your purchase.</p>
+                        </div>
+                        <div className="space-y-2">
+                            <p>For any queries or support, contact us:</p>
+                            <p className="flex items-center justify-center gap-4">
+                                <span className="flex items-center gap-1">
+                                    <FiMail className="w-4 h-4" />
+                                    {supportEmail}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                    <FiPhone className="w-4 h-4" />
+                                    {supportPhone}
+                                </span>
+                            </p>
+                            <p className="text-sm mt-4">This order slip is valid until delivery completion.</p>
+                            <p className="text-xs text-gray-400 mt-2">Generated from Admin Dashboard</p>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
 
-    
+
     );
 }
