@@ -12,31 +12,31 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea"; // Assuming you have a Textarea component
 
-export default function VariantTypeTableDialog({ children, onAddVariant, onEditVariant, initialData }) {
-  const [variantName, setVariantName] = useState("");
-  const [variantType, setVariantType] = useState("");
+export default function SizeTableDialog({ children, onAddSize, onEditSize, initialData }) {
+  const [sizeName, setSizeName] = useState("");
+  const [description, setDescription] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (initialData) {
-      setVariantName(initialData.name || "");
-      setVariantType(initialData.type || "");
+      setSizeName(initialData.name || "");
+      setDescription(initialData.description || "");
     } else {
-      setVariantName("");
-      setVariantType("");
+      setSizeName("");
+      setDescription("");
     }
     setErrors({});
   }, [initialData, isOpen]);
 
   const validateForm = () => {
     const newErrors = {};
-    if (!variantName.trim()) {
-      newErrors.variantName = "Variant Name is required.";
-    }
-    if (!variantType.trim()) {
-      newErrors.variantType = "Variant Type is required.";
+    if (!sizeName.trim()) {
+      newErrors.sizeName = "Size Name is required.";
+    } else if (sizeName.trim().length < 1) { // Added length validation for name
+      newErrors.sizeName = "Size Name must be at least 1 character long.";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -49,14 +49,14 @@ export default function VariantTypeTableDialog({ children, onAddVariant, onEditV
     }
 
     const data = {
-      name: variantName,
-      type: variantType,
+      name: sizeName,
+      description: description,
     };
 
     if (initialData) {
-      onEditVariant({ ...data, id: initialData._id });
+      onEditSize({ ...data, id: initialData._id });
     } else {
-      onAddVariant(data);
+      onAddSize(data);
     }
 
     setIsOpen(false);
@@ -68,30 +68,27 @@ export default function VariantTypeTableDialog({ children, onAddVariant, onEditV
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-center text-xl font-semibold">
-            {initialData ? "EDIT VARIANT TYPE" : "ADD VARIANT TYPE"}
+            {initialData ? "EDIT SIZE" : "ADD SIZE"}
           </AlertDialogTitle>
         </AlertDialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Input
-                placeholder="Variant Name"
-                value={variantName}
-                onChange={(e) => setVariantName(e.target.value)}
-                className={errors.variantName ? "border-red-500" : ""}
-              />
-              {errors.variantName && <p className="text-red-500 text-sm mt-1">{errors.variantName}</p>}
-            </div>
-            <div>
-              <Input
-                placeholder="Variant Type"
-                value={variantType}
-                onChange={(e) => setVariantType(e.target.value)}
-                className={errors.variantType ? "border-red-500" : ""}
-              />
-              {errors.variantType && <p className="text-red-500 text-sm mt-1">{errors.variantType}</p>}
-            </div>
+          <div>
+            <Input
+              placeholder="Size Name (e.g., S, M, L, XL, 32, 34)"
+              value={sizeName}
+              onChange={(e) => setSizeName(e.target.value)}
+              className={errors.sizeName ? "border-red-500" : ""}
+            />
+            {errors.sizeName && <p className="text-red-500 text-sm mt-1">{errors.sizeName}</p>}
+          </div>
+          <div>
+            <Textarea // Using Textarea for description
+              placeholder="Description (optional)"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="min-h-[80px]"
+            />
           </div>
 
           <AlertDialogFooter className="mt-6">

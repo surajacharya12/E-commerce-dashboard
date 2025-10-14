@@ -1,3 +1,4 @@
+// app/size/components/TopBar.jsx (copied for this example, or import from common location)
 "use client"
 
 import { Search } from "lucide-react";

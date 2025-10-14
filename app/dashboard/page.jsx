@@ -15,8 +15,10 @@ export default function Dashboard() {
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [brands, setBrands] = useState([]);
-  const [variantTypes, setVariantTypes] = useState([]);
-  const [variants, setVariants] = useState([]);
+  // --- START: MODIFIED CODE ---
+  const [colors, setColors] = useState([]); // New state for colors
+  const [sizes, setSizes] = useState([]);   // New state for sizes
+  // --- END: MODIFIED CODE ---
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingProduct, setEditingProduct] = useState(null);
@@ -34,8 +36,10 @@ export default function Dashboard() {
         fetchCategories(),
         fetchSubCategories(),
         fetchBrands(),
-        fetchVariantTypes(),
-        fetchVariants(),
+        // --- START: MODIFIED CODE ---
+        fetchColors(), // New fetch call
+        fetchSizes(),  // New fetch call
+        // --- END: MODIFIED CODE ---
       ]);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -106,29 +110,31 @@ export default function Dashboard() {
     }
   };
 
-  const fetchVariantTypes = async () => {
+  // --- START: MODIFIED CODE ---
+  const fetchColors = async () => {
     try {
-      const response = await fetch(`${url}variantTypes`);
+      const response = await fetch(`${url}colors`);
       const result = await response.json();
       if (result.success) {
-        setVariantTypes(result.data);
+        setColors(result.data);
       }
     } catch (error) {
-      console.error("Failed to fetch variant types:", error);
+      console.error("Failed to fetch colors:", error);
     }
   };
 
-  const fetchVariants = async () => {
+  const fetchSizes = async () => {
     try {
-      const response = await fetch(`${url}variants`);
+      const response = await fetch(`${url}sizes`);
       const result = await response.json();
       if (result.success) {
-        setVariants(result.data);
+        setSizes(result.data);
       }
     } catch (error) {
-      console.error("Failed to fetch variants:", error);
+      console.error("Failed to fetch sizes:", error);
     }
   };
+  // --- END: MODIFIED CODE ---
 
   const handleAddProduct = async (formData) => {
     try {
@@ -238,8 +244,10 @@ export default function Dashboard() {
             categories={categories}
             subcategories={subcategories}
             brands={brands}
-            variantTypes={variantTypes}
-            variants={variants}
+            // --- START: MODIFIED CODE ---
+            colors={colors} // Pass colors
+            sizes={sizes}   // Pass sizes
+          // --- END: MODIFIED CODE ---
           />
 
           <ProductsTable
@@ -250,8 +258,10 @@ export default function Dashboard() {
             categories={categories}
             subcategories={subcategories}
             brands={brands}
-            variantTypes={variantTypes}
-            variants={variants}
+            // --- START: MODIFIED CODE ---
+            colors={colors} // Pass colors
+            sizes={sizes}   // Pass sizes
+          // --- END: MODIFIED CODE ---
           />
         </main>
 

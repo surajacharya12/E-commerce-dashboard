@@ -13,8 +13,10 @@ const ProductsTable = ({
   categories = [],
   subcategories = [],
   brands = [],
-  variantTypes = [],
-  variants = [],
+  // --- START: MODIFIED CODE ---
+  colors = [], // New prop for colors
+  sizes = [],  // New prop for sizes
+  // --- END: MODIFIED CODE ---
 }) => {
   const handleEdit = (product) => {
     onSetEditingProduct(product);
@@ -38,6 +40,14 @@ const ProductsTable = ({
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                 Stock
               </th>
+              {/* --- START: MODIFIED CODE --- */}
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                Colors
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                Sizes
+              </th>
+              {/* --- END: MODIFIED CODE --- */}
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                 Rating
               </th>
@@ -49,7 +59,7 @@ const ProductsTable = ({
           <tbody className="bg-gray-800 divide-y divide-gray-700">
             {products.length === 0 ? (
               <tr>
-                <td colSpan="6" className="text-center py-12">
+                <td colSpan="8" className="text-center py-12"> {/* Updated colspan */}
                   <Package className="mx-auto h-12 w-12 text-gray-400" />
                   <h3 className="mt-2 text-sm font-medium text-white">No products</h3>
                   <p className="mt-1 text-sm text-gray-400">
@@ -143,6 +153,40 @@ const ProductsTable = ({
                       {product.stock || 0} units
                     </span>
                   </td>
+                  {/* --- START: MODIFIED CODE --- */}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex flex-wrap gap-1">
+                      {product.colors && product.colors.length > 0 ? (
+                        product.colors.map((color) => (
+                          <span
+                            key={color._id}
+                            className="w-4 h-4 rounded-full border border-gray-500"
+                            style={{ backgroundColor: color.hexCode }}
+                            title={color.name}
+                          ></span>
+                        ))
+                      ) : (
+                        <span className="text-sm text-gray-400">N/A</span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex flex-wrap gap-1">
+                      {product.sizes && product.sizes.length > 0 ? (
+                        product.sizes.map((size) => (
+                          <span
+                            key={size._id}
+                            className="text-xs text-white bg-gray-600 px-2 py-1 rounded-full"
+                          >
+                            {size.name}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-sm text-gray-400">N/A</span>
+                      )}
+                    </div>
+                  </td>
+                  {/* --- END: MODIFIED CODE --- */}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <Star className="h-4 w-4 text-yellow-400 mr-1" />
@@ -163,8 +207,10 @@ const ProductsTable = ({
                         categories={categories}
                         subcategories={subcategories}
                         brands={brands}
-                        variantTypes={variantTypes}
-                        variants={variants}
+                        // --- START: MODIFIED CODE ---
+                        colors={colors} // Pass colors to AddProductDialog
+                        sizes={sizes}   // Pass sizes to AddProductDialog
+                        // --- END: MODIFIED CODE ---
                         setEditingProduct={onSetEditingProduct}
                       >
                         <AlertDialogTrigger asChild>

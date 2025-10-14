@@ -21,6 +21,10 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  MultiSelect, // Assuming you have a MultiSelect component
+} from "@/components/ui/multi-select"; // You'll need to create or import a MultiSelect component
+
 
 export default function AddProductDialog({
   children,
@@ -30,8 +34,8 @@ export default function AddProductDialog({
   categories = [],
   subcategories = [],
   brands = [],
-  variantTypes = [],
-  variants = [],
+  colors = [], // New prop for colors
+  sizes = [],  // New prop for sizes
   setEditingProduct,
 }) {
   const [imagePreviews, setImagePreviews] = useState(Array(5).fill(null));
@@ -44,8 +48,8 @@ export default function AddProductDialog({
   const [categoryId, setCategoryId] = useState("");
   const [subcategoryId, setSubcategoryId] = useState("");
   const [brandId, setBrandId] = useState("");
-  const [variantTypeId, setVariantTypeId] = useState("");
-  const [variantId, setVariantId] = useState("");
+  const [selectedColors, setSelectedColors] = useState([]); // New state for selected colors
+  const [selectedSizes, setSelectedSizes] = useState([]);   // New state for selected sizes
   const [adminRating, setAdminRating] = useState("");
   const [pointsText, setPointsText] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -72,12 +76,18 @@ export default function AddProductDialog({
       setCategoryId(initialData.proCategoryId?._id || "");
       setSubcategoryId(initialData.proSubCategoryId?._id || "");
       setBrandId(initialData.proBrandId?._id || "");
-      setVariantTypeId(initialData.proVariantTypeId?._id || "");
-      setVariantId(
-        Array.isArray(initialData.proVariantId) &&
-          initialData.proVariantId.length > 0
-          ? initialData.proVariantId[0]?._id
-          : ""
+
+
+      // Set initial colors and sizes for editing
+      setSelectedColors(
+        Array.isArray(initialData.colors)
+          ? initialData.colors.map((c) => c._id || c.id)
+          : []
+      );
+      setSelectedSizes(
+        Array.isArray(initialData.sizes)
+          ? initialData.sizes.map((s) => s._id || s.id)
+          : []
       );
 
       if (initialData.images && Array.isArray(initialData.images)) {
@@ -100,8 +110,9 @@ export default function AddProductDialog({
       setCategoryId("");
       setSubcategoryId("");
       setBrandId("");
-      setVariantTypeId("");
-      setVariantId("");
+
+      setSelectedColors([]); // Reset colors
+      setSelectedSizes([]);   // Reset sizes
       setImagePreviews(Array(5).fill(null));
       setImageFiles(Array(5).fill(null));
       setPointsText("");
@@ -111,7 +122,8 @@ export default function AddProductDialog({
 
   const allSubcategories = subcategories;
   const allBrands = brands;
-  const allVariants = variants;
+  const allColors = colors; // Use the colors prop
+  const allSizes = sizes;   // Use the sizes prop
 
   const handleImageChange = (index, file) => {
     if (!file) return;
@@ -154,7 +166,7 @@ export default function AddProductDialog({
     fd.append("price", price);
     if (offerPrice !== "") fd.append("offerPrice", offerPrice);
     fd.append("quantity", quantity);
-    fd.append("stock", quantity);
+    fd.append("stock", quantity); // Ensure stock is also sent for consistency
     if (adminRating !== "") fd.append("adminRating", adminRating);
 
     const pointsArray = pointsText
@@ -169,6 +181,14 @@ export default function AddProductDialog({
     if (brandId) fd.append("proBrandId", brandId);
     if (variantTypeId) fd.append("proVariantTypeId", variantTypeId);
     if (variantId) fd.append("proVariantId", variantId);
+
+    // Append selected colors and sizes as JSON strings
+    if (selectedColors.length > 0) {
+      fd.append("colors", JSON.stringify(selectedColors));
+    }
+    if (selectedSizes.length > 0) {
+      fd.append("sizes", JSON.stringify(selectedSizes));
+    }
 
     imageFiles.forEach((file, idx) => {
       if (file) {
@@ -203,6 +223,13 @@ export default function AddProductDialog({
       alert("Failed to save product. Please try again.");
     }
   };
+
+  // Helper function to map data for MultiSelect
+  const mapDataForMultiSelect = (data) =>
+    data.map((item) => ({
+      value: item.id || item._id,
+      label: item.name,
+    }));
 
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
@@ -440,51 +467,21 @@ Fast charging battery
             </div>
           </div>
 
-          {/* Variant Row */}
-          <div className="grid grid-cols-2 gap-2">
-            <Select
-              value={variantTypeId}
-              onValueChange={(val) => {
-                setVariantTypeId(val);
-                setVariantId("");
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select Variant Type (optional)" />
-              </SelectTrigger>
-              <SelectContent>
-                {variantTypes.length === 0 ? (
-                  <SelectItem value="__no_variant_types__" disabled>
-                    No variant types found
-                  </SelectItem>
-                ) : (
-                  variantTypes.map((vt) => (
-                    <SelectItem key={vt.id || vt._id} value={vt.id || vt._id}>
-                      {vt.name}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
 
-            <Select value={variantId} onValueChange={setVariantId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select Variant (optional)" />
-              </SelectTrigger>
-              <SelectContent>
-                {allVariants.length === 0 ? (
-                  <SelectItem value="__no_variants__" disabled>
-                    No variants found
-                  </SelectItem>
-                ) : (
-                  allVariants.map((v) => (
-                    <SelectItem key={v.id || v._id} value={v.id || v._id}>
-                      {v.name}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
+          {/* Colors and Sizes MultiSelects */}
+          <div className="grid grid-cols-2 gap-2">
+            <MultiSelect
+              options={mapDataForMultiSelect(allColors)}
+              selected={selectedColors}
+              onSelect={setSelectedColors}
+              placeholder="Select Colors (optional)"
+            />
+            <MultiSelect
+              options={mapDataForMultiSelect(allSizes)}
+              selected={selectedSizes}
+              onSelect={setSelectedSizes}
+              placeholder="Select Sizes (optional)"
+            />
           </div>
         </form>
 

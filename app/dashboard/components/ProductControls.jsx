@@ -15,8 +15,10 @@ const ProductControls = ({
   categories,
   subcategories,
   brands,
-  variantTypes = [],
-  variants = [],
+  // --- START: MODIFIED CODE ---
+  colors = [], // New prop for colors
+  sizes = [],  // New prop for sizes
+  // --- END: MODIFIED CODE ---
 }) => {
   return (
     <div className="mb-10">
@@ -35,8 +37,10 @@ const ProductControls = ({
             categories={categories}
             subcategories={subcategories}
             brands={brands}
-            variantTypes={variantTypes}
-            variants={variants}
+            // --- START: MODIFIED CODE ---
+            colors={colors} // Pass colors to AddProductDialog
+            sizes={sizes}   // Pass sizes to AddProductDialog
+            // --- END: MODIFIED CODE ---
             setEditingProduct={setEditingProduct}
           >
             <AlertDialogTrigger asChild>
