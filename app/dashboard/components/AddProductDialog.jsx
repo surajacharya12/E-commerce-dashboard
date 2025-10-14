@@ -179,8 +179,9 @@ export default function AddProductDialog({
     if (categoryId) fd.append("proCategoryId", categoryId);
     if (subcategoryId) fd.append("proSubCategoryId", subcategoryId);
     if (brandId) fd.append("proBrandId", brandId);
-    if (variantTypeId) fd.append("proVariantTypeId", variantTypeId);
-    if (variantId) fd.append("proVariantId", variantId);
+    // Removed the following lines as variantTypeId and variantId are not defined
+    // if (variantTypeId) fd.append("proVariantTypeId", variantTypeId);
+    // if (variantId) fd.append("proVariantId", variantId);
 
     // Append selected colors and sizes as JSON strings
     if (selectedColors.length > 0) {
