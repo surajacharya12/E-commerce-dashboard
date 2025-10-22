@@ -37,7 +37,7 @@ const ReturnDetails = () => {
     if (returnId) {
       loadReturnDetails();
     }
-  }, [returnId]);
+  }, [returnId, loadReturnDetails]);
 
   const loadReturnDetails = async () => {
     try {
@@ -215,7 +215,7 @@ const ReturnDetails = () => {
                 Return Not Found
               </h3>
               <p className="text-gray-400">
-                The return request you're looking for doesn't exist.
+                The return request you&apos;re looking for doesn&apos;t exist.
               </p>
             </div>
           </main>
