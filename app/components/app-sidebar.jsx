@@ -4,7 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState, useEffect } from "react"
 import {
-  Grid, Tag, Layers, Box, MessagesSquare, Repeat, Type, ShoppingCart, Gift, Percent, Image, Bell, MapPin, LogOut, User, Clock
+  Grid, Tag, Layers, Box, MessagesSquare, Repeat, Type, ShoppingCart, Gift, Percent, Image, Bell, MapPin, LogOut, User, Clock, RotateCcw
 } from "lucide-react"
 import { useAuth } from "../../hooks/useAuth"
 import url from "../http/page"
@@ -29,6 +29,7 @@ const items = [
   { title: "Color", url: "/color", icon: Repeat },
   { title: "Size", url: "/size", icon: Type },
   { title: "Order", url: "/order", icon: ShoppingCart },
+  { title: "Returns", url: "/returns", icon: RotateCcw },
   { title: "Coupon", url: "/coupon", icon: Gift },
   { title: "Customer Chats", url: "/chats", icon: MessagesSquare },
   { title: "Discount", url: "/discount", icon: Percent },

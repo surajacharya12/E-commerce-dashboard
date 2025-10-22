@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import TopBar from "./components/TopBar";
+import StatsCards from "./components/StatsCards";
 import ProductControls from "./components/ProductControls";
 import ProductsTable from "./components/ProductTable";
 import OrderDetails from "./components/OrderDetails";
@@ -233,6 +234,8 @@ export default function Dashboard() {
             filters={filters}
             setFilters={setFilters}
           />
+
+          <StatsCards />
 
           <ProductControls
             productCounts={productCounts}
