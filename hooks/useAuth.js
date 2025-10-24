@@ -14,43 +14,42 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     checkAuth();
-
-    // Clear session on page unload/refresh
-    const handleBeforeUnload = () => {
-      localStorage.removeItem("dashboardAuth");
-      localStorage.removeItem("dashboardUser");
-      localStorage.removeItem("dashboardLoginTime");
-    };
-
-    // Clear session on visibility change (tab switch, minimize, etc.)
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        localStorage.removeItem("dashboardAuth");
-        localStorage.removeItem("dashboardUser");
-        localStorage.removeItem("dashboardLoginTime");
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
   }, []);
 
   const checkAuth = () => {
     try {
-      // Always require fresh login - no session persistence
-      // Clear any existing localStorage data on page load
-      localStorage.removeItem("dashboardAuth");
-      localStorage.removeItem("dashboardUser");
-      localStorage.removeItem("dashboardLoginTime");
+      // Check for existing authentication state
+      const isAuth = localStorage.getItem("dashboardAuth");
+      const storedUser = localStorage.getItem("dashboardUser");
+      const loginTime = localStorage.getItem("dashboardLoginTime");
 
-      setIsAuthenticated(false);
-      setUser(null);
-      console.log("🔒 Fresh login required - no session persistence");
+      // Check if session is still valid (24 hours)
+      const sessionDuration = 24 * 60 * 60 * 1000; // 24 hours
+      const currentTime = new Date().getTime();
+
+      if (isAuth === "true" && storedUser && loginTime) {
+        const timeDiff = currentTime - parseInt(loginTime);
+
+        if (timeDiff < sessionDuration) {
+          // Session is still valid
+          setIsAuthenticated(true);
+          setUser(storedUser);
+          console.log("✅ Valid session found, user logged in");
+        } else {
+          // Session expired
+          localStorage.removeItem("dashboardAuth");
+          localStorage.removeItem("dashboardUser");
+          localStorage.removeItem("dashboardLoginTime");
+          setIsAuthenticated(false);
+          setUser(null);
+          console.log("⏰ Session expired, please login again");
+        }
+      } else {
+        // No valid session found
+        setIsAuthenticated(false);
+        setUser(null);
+        console.log("🔒 No valid session found");
+      }
     } catch (error) {
       console.error("Auth check error:", error);
       setIsAuthenticated(false);
@@ -61,14 +60,20 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = (username) => {
-    // Set authentication state in memory only (no localStorage persistence)
+    // Set authentication state and persist in localStorage
+    const currentTime = new Date().getTime();
+
+    localStorage.setItem("dashboardAuth", "true");
+    localStorage.setItem("dashboardUser", username);
+    localStorage.setItem("dashboardLoginTime", currentTime.toString());
+
     setIsAuthenticated(true);
     setUser(username);
 
     console.log(
       "✅ User logged in:",
       username,
-      "- Session will not persist across page refreshes"
+      "- Session will persist for 24 hours"
     );
   };
 
