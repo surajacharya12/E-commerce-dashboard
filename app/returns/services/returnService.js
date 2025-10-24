@@ -1,26 +1,44 @@
+import {
+  API_BASE_URL,
+  testApiConnection,
+  findWorkingApiUrl,
+} from "../../../lib/api-config.js";
+
 // Return API Service
 class ReturnService {
   constructor() {
-    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    this.baseUrl = API_BASE_URL;
+    this.workingUrl = null;
+    console.log("🔧 ReturnService initialized with baseUrl:", this.baseUrl);
+  }
+
+  // Get working URL with fallback
+  async getWorkingUrl() {
+    if (this.workingUrl) {
+      return this.workingUrl;
+    }
+
+    const result = await findWorkingApiUrl();
+    if (result.success) {
+      this.workingUrl = result.url;
+      this.baseUrl = result.url;
+      return result.url;
+    }
+
+    return this.baseUrl;
   }
 
   // Test backend connection
   async testConnection() {
-    try {
-      const response = await fetch(`${this.baseUrl}/health`);
-      const data = await response.json();
-      console.log("🔗 Backend connection test:", data);
-      return response.ok;
-    } catch (error) {
-      console.error("❌ Backend connection failed:", error);
-      return false;
-    }
+    const result = await testApiConnection();
+    return result.success;
   }
 
   // Get all returns with pagination and filtering
   async getReturns(page = 1, limit = 10, status = "") {
     try {
-      let url = `${this.baseUrl}/returns/admin/all?page=${page}&limit=${limit}`;
+      const baseUrl = await this.getWorkingUrl();
+      let url = `${baseUrl}/returns/admin/all?page=${page}&limit=${limit}`;
       if (status) {
         url += `&status=${status}`;
       }
@@ -46,9 +64,8 @@ class ReturnService {
   // Get return statistics
   async getStats() {
     try {
-      const response = await fetch(
-        `${this.baseUrl}/returns/admin/all?limit=1000`
-      );
+      const baseUrl = await this.getWorkingUrl();
+      const response = await fetch(`${baseUrl}/returns/admin/all?limit=1000`);
       const data = await response.json();
 
       if (data.success) {
