@@ -43,8 +43,13 @@ class ReturnService {
         url += `&status=${status}`;
       }
 
+      console.log("🔍 Fetching returns from:", url);
+
       const response = await fetch(url);
+      console.log("📡 Response status:", response.status, response.statusText);
+
       const data = await response.json();
+      console.log("📦 Response data:", data);
 
       if (data.success) {
         return {
@@ -57,6 +62,14 @@ class ReturnService {
       }
     } catch (error) {
       console.error("❌ Error loading returns:", error);
+
+      // If it's a network error, provide more helpful message
+      if (error.message.includes("fetch") || error.name === "TypeError") {
+        throw new Error(
+          "Unable to connect to server. Please check if the backend is running on port 3001."
+        );
+      }
+
       throw error;
     }
   }

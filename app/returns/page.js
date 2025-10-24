@@ -63,6 +63,28 @@ const ReturnsManagement = () => {
   useEffect(() => {
     loadReturns();
     loadStats();
+
+    // Auto-fallback if loading takes too long
+    const fallbackTimer = setTimeout(() => {
+      if (loading) {
+        console.log("🔧 Dashboard loading timeout, forcing data load");
+        fetch("http://localhost:3001/returns/admin/all?limit=10")
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              setReturns(data.data || []);
+              setTotalPages(data.pagination?.totalPages || 1);
+              setError("⚠️ Auto-loaded data after timeout");
+              setLoading(false);
+            }
+          })
+          .catch((err) => {
+            console.error("Auto-fallback failed:", err);
+          });
+      }
+    }, 5000);
+
+    return () => clearTimeout(fallbackTimer);
   }, [selectedStatus, currentPage]);
 
   // Load returns data
@@ -71,16 +93,78 @@ const ReturnsManagement = () => {
       setLoading(true);
       setError(null);
 
+      console.log(
+        "🔄 Loading returns - Page:",
+        currentPage,
+        "Status:",
+        selectedStatus
+      );
+
       const result = await returnService.getReturns(
         currentPage,
         10,
         selectedStatus
       );
-      setReturns(result.data);
-      setTotalPages(result.pagination.totalPages);
+
+      console.log("✅ Returns loaded successfully:", result);
+
+      if (result && result.data) {
+        setReturns(result.data);
+        setTotalPages(result.pagination?.totalPages || 1);
+        setDbStatus("connected");
+      } else {
+        console.log("⚠️ No data in result, using fallback");
+        // Try direct API call as fallback
+        const directResponse = await fetch(
+          "http://localhost:3001/returns/admin/all?limit=10"
+        );
+        if (directResponse.ok) {
+          const directData = await directResponse.json();
+          setReturns(directData.data || []);
+          setTotalPages(directData.pagination?.totalPages || 1);
+          setDbStatus("connected");
+        } else {
+          throw new Error("Direct API call failed");
+        }
+      }
     } catch (err) {
-      setError(err.message);
-      setDbStatus("disconnected");
+      console.error("❌ Error loading returns:", err);
+
+      // If API is not available, show mock data for development
+      if (err.message.includes("connect to server")) {
+        console.log("🔧 API not available, using mock data for development");
+
+        const mockReturns = [
+          {
+            _id: "mock1",
+            returnNumber: "RET001",
+            orderNumber: "ORD001",
+            returnStatus: "requested",
+            returnAmount: 299.99,
+            returnDate: new Date().toISOString(),
+            userID: { name: "John Doe", email: "john@example.com" },
+            items: [{ productName: "Sample Product" }],
+          },
+          {
+            _id: "mock2",
+            returnNumber: "RET002",
+            orderNumber: "ORD002",
+            returnStatus: "approved",
+            returnAmount: 199.99,
+            returnDate: new Date().toISOString(),
+            userID: { name: "Jane Smith", email: "jane@example.com" },
+            items: [{ productName: "Another Product" }],
+          },
+        ];
+
+        setReturns(mockReturns);
+        setTotalPages(1);
+        setError("⚠️ Using mock data - Backend server not available");
+        setDbStatus("disconnected");
+      } else {
+        setError(err.message || "Failed to load returns");
+        setDbStatus("disconnected");
+      }
     } finally {
       setLoading(false);
     }
@@ -100,11 +184,21 @@ const ReturnsManagement = () => {
 
   // Test backend connection
   const testConnection = async () => {
+    console.log("🔍 Testing backend connection...");
     const isConnected = await returnService.testConnection();
+    console.log("📡 Connection test result:", isConnected);
+
     setDbStatus(isConnected ? "connected" : "disconnected");
+
     if (isConnected) {
+      console.log("✅ Connection successful, loading data...");
       loadReturns();
       loadStats();
+    } else {
+      console.log("❌ Connection failed");
+      setError(
+        "Cannot connect to backend server. Please ensure the API server is running on port 3001."
+      );
     }
   };
 
@@ -270,6 +364,30 @@ const ReturnsManagement = () => {
             >
               <RefreshCw className="w-4 h-4" />
               <span>Refresh</span>
+            </button>
+
+            <button
+              onClick={async () => {
+                console.log("🔧 Force loading data...");
+                try {
+                  const response = await fetch(
+                    "http://localhost:3001/returns/admin/all?limit=10"
+                  );
+                  const data = await response.json();
+                  console.log("Direct API result:", data);
+                  if (data.success) {
+                    setReturns(data.data);
+                    setTotalPages(data.pagination?.totalPages || 1);
+                    setError(null);
+                    setLoading(false);
+                  }
+                } catch (err) {
+                  console.error("Direct API failed:", err);
+                }
+              }}
+              className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              <span>Force Load</span>
             </button>
 
             <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">

@@ -8,16 +8,12 @@ import {
   User,
   Calendar,
   DollarSign,
-  MapPin,
-  FileText,
   CheckCircle,
   XCircle,
   Clock,
   AlertCircle,
   Save,
   RefreshCw,
-  Edit,
-  Trash2,
 } from "lucide-react";
 import ProtectedLayout from "../../components/ProtectedLayout";
 
@@ -32,12 +28,6 @@ const ReturnDetails = () => {
   const [updating, setUpdating] = useState(false);
   const [adminNotes, setAdminNotes] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
-
-  useEffect(() => {
-    if (returnId) {
-      loadReturnDetails();
-    }
-  }, [returnId, loadReturnDetails]);
 
   const loadReturnDetails = async () => {
     try {
@@ -64,6 +54,12 @@ const ReturnDetails = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (returnId) {
+      loadReturnDetails();
+    }
+  }, [returnId]);
 
   const updateReturnStatus = async () => {
     if (!returnData || !selectedStatus) return;
