@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import url from "../../http/page";
 import { Label } from "@/components/ui/label";
 
-export default function AddCouponDialog({ children, onAddCoupon, onEditCoupon, initialData }) {
+export default function AddCouponDialog({ children, onAddCoupon, onEditCoupon, initialData, setEditingCoupon }) {
   const [couponCode, setCouponCode] = useState("");
   const [discountType, setDiscountType] = useState("fixed");
   const [discountAmount, setDiscountAmount] = useState("");
@@ -30,6 +30,7 @@ export default function AddCouponDialog({ children, onAddCoupon, onEditCoupon, i
   const [selectedProduct, setSelectedProduct] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
@@ -66,11 +67,11 @@ export default function AddCouponDialog({ children, onAddCoupon, onEditCoupon, i
       setDiscountType(initialData.discountType || "fixed");
       setDiscountAmount(String(initialData.discountAmount || ""));
       setMinimumPurchaseAmount(String(initialData.minimumPurchaseAmount || ""));
-      setSelectDate(initialData.selectDate || "");
+      setSelectDate(initialData.endDate ? new Date(initialData.endDate).toISOString().split('T')[0] : "");
       setStatus(initialData.status || "active");
-      setSelectedCategory(initialData.selectedCategory?._id || "");
-      setSelectedSubCategory(initialData.selectedSubCategory?._id || "");
-      setSelectedProduct(initialData.selectedProduct?._id || "");
+      setSelectedCategory(initialData.applicableCategory?._id || "");
+      setSelectedSubCategory(initialData.applicableSubCategory?._id || "");
+      setSelectedProduct(initialData.applicableProduct?._id || "");
     } else {
       setCouponCode("");
       setDiscountType("fixed");
@@ -89,55 +90,97 @@ export default function AddCouponDialog({ children, onAddCoupon, onEditCoupon, i
     (s) => !selectedCategory || s.categoryId?._id === selectedCategory
   );
   const filteredProducts = products
-    .filter((p) => !selectedCategory || p.categoryId?._id === selectedCategory)
-    .filter((p) => !selectedSubCategory || p.subcategoryId?._id === selectedSubCategory);
+    .filter((p) => !selectedCategory || p.proCategoryId?._id === selectedCategory)
+    .filter((p) => !selectedSubCategory || p.proSubCategoryId?._id === selectedSubCategory);
 
   const validateForm = () => {
     const newErrors = {};
-    if (!couponCode.trim()) newErrors.couponCode = "Coupon code is required.";
-    if (!String(discountAmount).trim() || isNaN(parseFloat(discountAmount)) || parseFloat(discountAmount) < 0) {
+
+    // Validate coupon code
+    if (!couponCode.trim()) {
+      newErrors.couponCode = "Coupon code is required.";
+    } else if (couponCode.trim().length < 3) {
+      newErrors.couponCode = "Coupon code must be at least 3 characters long.";
+    }
+
+    // Validate discount amount
+    if (!String(discountAmount).trim() || isNaN(parseFloat(discountAmount)) || parseFloat(discountAmount) <= 0) {
       newErrors.discountAmount = "Please enter a valid positive number.";
     } else if (discountType === "percentage" && parseFloat(discountAmount) > 100) {
       newErrors.discountAmount = "Percentage discount cannot exceed 100.";
     }
+
+    // Validate minimum purchase amount (optional field)
     if (String(minimumPurchaseAmount).trim() && (isNaN(parseFloat(minimumPurchaseAmount)) || parseFloat(minimumPurchaseAmount) < 0)) {
-      newErrors.minimumPurchaseAmount = "Minimum purchase amount must be valid.";
+      newErrors.minimumPurchaseAmount = "Minimum purchase amount must be a valid positive number.";
     }
+
+    // Validate expiration date
     if (!selectDate) {
       newErrors.selectDate = "Expiration date is required.";
     } else {
       const today = new Date().toISOString().split("T")[0];
-      if (selectDate < today) newErrors.selectDate = "Expiration date cannot be in the past.";
+      if (selectDate < today) {
+        newErrors.selectDate = "Expiration date cannot be in the past.";
+      }
     }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (!validateForm() || isSubmitting) return;
 
-    const formData = new FormData();
-    formData.append("couponCode", couponCode);
-    formData.append("discountType", discountType);
-    formData.append("discountAmount", parseFloat(discountAmount));
-    formData.append("minimumPurchaseAmount", minimumPurchaseAmount ? parseFloat(minimumPurchaseAmount) : "");
-    formData.append("selectDate", selectDate);
-    formData.append("status", status);
-    formData.append("selectedCategory", selectedCategory);
-    formData.append("selectedSubCategory", selectedSubCategory);
-    formData.append("selectedProduct", selectedProduct);
+    setIsSubmitting(true);
 
-    if (initialData) {
-      await onEditCoupon(initialData._id, formData);
-    } else {
-      await onAddCoupon(formData);
+    // Create a plain object instead of FormData for JSON API
+    const couponData = {
+      couponCode: couponCode.trim().toUpperCase(),
+      discountType,
+      discountAmount: parseFloat(discountAmount),
+      minimumPurchaseAmount: minimumPurchaseAmount ? parseFloat(minimumPurchaseAmount) : 0,
+      endDate: selectDate,
+      status,
+      applicableCategory: selectedCategory === "__none__" || !selectedCategory ? null : selectedCategory,
+      applicableSubCategory: selectedSubCategory === "__none__" || !selectedSubCategory ? null : selectedSubCategory,
+      applicableProduct: selectedProduct === "__none__" || !selectedProduct ? null : selectedProduct,
+    };
+
+    console.log("Submitting coupon data:", couponData);
+
+    try {
+      if (initialData) {
+        await onEditCoupon(initialData._id, couponData);
+      } else {
+        await onAddCoupon(couponData);
+      }
+      setIsOpen(false);
+      // Reset form
+      setCouponCode("");
+      setDiscountAmount("");
+      setMinimumPurchaseAmount("");
+      setSelectDate("");
+      setSelectedCategory("");
+      setSelectedSubCategory("");
+      setSelectedProduct("");
+    } catch (error) {
+      console.error("Error submitting coupon:", error);
+      toast.error("Failed to save coupon. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
-    setIsOpen(false);
   };
 
   return (
-    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+    <AlertDialog open={isOpen} onOpenChange={(open) => {
+      console.log("Dialog open state changed:", open);
+      setIsOpen(open);
+      if (!open && setEditingCoupon) {
+        setEditingCoupon(null);
+      }
+    }}>
       {children}
       <AlertDialogContent className="max-w-3xl">
         <AlertDialogHeader>
@@ -301,12 +344,17 @@ export default function AddCouponDialog({ children, onAddCoupon, onEditCoupon, i
         </form>
 
         <AlertDialogFooter className="mt-6">
-          <AlertDialogCancel onClick={() => setIsOpen(false)}>Cancel</AlertDialogCancel>
-          <AlertDialogAction asChild>
-            <Button type="submit" onClick={handleSubmit}>
-              {initialData ? "Save Changes" : "Submit"}
-            </Button>
-          </AlertDialogAction>
+          <AlertDialogCancel onClick={() => setIsOpen(false)} disabled={isSubmitting}>
+            Cancel
+          </AlertDialogCancel>
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            className="bg-blue-600 hover:bg-blue-700"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Saving..." : (initialData ? "Save Changes" : "Add Coupon")}
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

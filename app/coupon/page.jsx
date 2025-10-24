@@ -3,8 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import TopBar from "./components/TopBar";
 import CouponTable from "./components/CouponTable";
+
 import ProtectedLayout from "../components/ProtectedLayout";
-import url from "../http/page";   // ✅ central URL file
+import url from "../http/page";
 import { toast } from "sonner";
 
 export default function Coupon() {
@@ -34,12 +35,17 @@ export default function Coupon() {
   // ✅ handle Add
   const handleAddCoupon = async (newCouponData) => {
     try {
+      console.log("Sending coupon data to API:", newCouponData);
+
       const res = await fetch(`${url}couponCodes`, {
         method: "POST",
-        body: newCouponData,   // ✅ FormData direct
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newCouponData),
       });
 
       const data = await res.json();
+      console.log("API response:", data);
+
       if (data.success) {
         fetchCoupons();
         setEditingCoupon(null);
@@ -56,12 +62,17 @@ export default function Coupon() {
   // ✅ handle Edit
   const handleEditCoupon = async (id, updatedCouponData) => {
     try {
+      console.log("Updating coupon with data:", updatedCouponData);
+
       const res = await fetch(`${url}couponCodes/${id}`, {
         method: "PUT",
-        body: updatedCouponData,  // ✅ FormData direct
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedCouponData),
       });
 
       const data = await res.json();
+      console.log("Update API response:", data);
+
       if (data.success) {
         fetchCoupons();
         setEditingCoupon(null);

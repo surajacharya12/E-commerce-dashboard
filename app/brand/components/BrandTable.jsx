@@ -21,7 +21,7 @@ const BrandTable = ({ brands, subcategories, onAddBrand, onEditBrand, onDeleteBr
         setIsDeleteDialogOpen(false);
         setBrandToDelete(null);
     };
-    
+
     return (
         <div>
             {/* Header section */}
