@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { testApiConnection } from "../../lib/api-config";
 
 export default function TestReturnsPage() {
@@ -77,8 +78,8 @@ export default function TestReturnsPage() {
 
           <div className="mb-6">
             <p className="text-gray-600 mb-4">
-              This page tests the dashboard's connection to the returns API. Use
-              this to debug connection and loading issues.
+              This page tests the dashboard&apos;s connection to the returns
+              API. Use this to debug connection and loading issues.
             </p>
 
             <button
@@ -133,12 +134,12 @@ export default function TestReturnsPage() {
           <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
             <h3 className="font-semibold text-blue-900 mb-2">Quick Actions:</h3>
             <div className="space-y-2">
-              <a
+              <Link
                 href="/returns"
                 className="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
               >
                 Go to Returns Page
-              </a>
+              </Link>
             </div>
           </div>
         </div>
